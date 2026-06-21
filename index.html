@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BUZZ SHORTS — 今、跳ねている動画だけ</title>
+<meta name="description" content="登録者数に対して異常に再生されているYouTube Shortsだけを集めた、急上昇観測サイト。">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B0E11">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BUZZ SHORTS">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B0E11;
+    --surface:#161B22;
+    --text:#F5F3EE;
+    --text-dim:#8A8F98;
+    --spike:#D4FF3D;
+    --hot:#FF5C3D;
+    --font-display:'Space Mono', monospace;
+    --font-body:'Noto Sans JP', sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+  }
+  body{
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(212,255,61,0.05), transparent 35%),
+      radial-gradient(circle at 85% 90%, rgba(255,92,61,0.05), transparent 35%);
+  }
+  button{font-family:inherit;}
+
+  /* ===== Top bar ===== */
+  .topbar{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:50;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:max(10px, env(safe-area-inset-top)) 14px 12px;
+    background:linear-gradient(to bottom, rgba(11,14,17,0.94) 60%, rgba(11,14,17,0));
+    pointer-events:none;
+  }
+  .topbar > *{pointer-events:auto;}
+
+  .topbar-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .logo{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.06em;
+    flex-shrink:0;
+    white-space:nowrap;
+  }
+  .logo .accent{color:var(--spike);}
+
+  .topbar-spacer{flex:1;}
+
+  /* 丸ピル型のアイコンボタン共通 */
+  .icon-btn{
+    font-family:var(--font-display);
+    font-size:12px;
+    letter-spacing:0.04em;
+    padding:6px 11px;
+    border:1px solid rgba(245,243,238,0.18);
+    border-radius:999px;
+    background:rgba(11,14,17,0.4);
+    color:var(--text);
+    cursor:pointer;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    line-height:1;
+  }
+  .icon-btn.streak{
+    color:var(--hot);
+    border-color:rgba(255,92,61,0.35);
+    font-weight:700;
+  }
+  .icon-btn.autoplay-on{
+    color:var(--bg);
+    background:var(--spike);
+    border-color:var(--spike);
+    font-weight:700;
+  }
+
+  .genre-tabs{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    flex:1;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .genre-tabs::-webkit-scrollbar{display:none;}
+  .genre-tab{
+    font-family:var(--font-display);
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    padding:6px 12px;
+    border:1px solid rgba(245,243,238,0.18);
+    border-radius:999px;
+    color:var(--text-dim);
+    white-space:nowrap;
+    cursor:pointer;
+    background:rgba(11,14,17,0.4);
+    transition:background .15s, color .15s, border-color .15s;
+    flex-shrink:0;
+  }
+  .genre-tab.active{
+    color:var(--bg);
+    background:var(--spike);
+    border-color:var(--spike);
+    font-weight:700;
+  }
+  .genre-tab.special.active{
+    background:var(--hot);
+    border-color:var(--hot);
+  }
+
+  /* ===== Feed ===== */
+  .feed{
+    height:100vh;
+    height:100dvh;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    scrollbar-width:none;
+  }
+  .feed::-webkit-scrollbar{display:none;}
+
+  .card{
+    height:100vh;
+    height:100dvh;
+    scroll-snap-align:start;
+    scroll-snap-stop:always;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+
+  .card-inner{
+    position:relative;
+    width:100%;
+    height:100%;
+    max-width:480px;
+    margin:0 auto;
+    background:#000;
+    overflow:hidden;
+  }
+  @media (min-width:560px){
+    .card-inner{
+      height:calc(100% - 32px);
+      margin:16px auto;
+      border-radius:22px;
+      box-shadow:0 30px 60px -20px rgba(0,0,0,0.6);
+    }
+  }
+
+  .media{position:absolute;inset:0;background:#000;}
+  .media img{
+    width:100%;height:100%;object-fit:cover;
+    filter:brightness(0.92);
+  }
+  .media iframe{
+    width:100%;height:100%;border:0;
+    object-fit:cover;
+  }
+
+  .play-hint{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    pointer-events:none;
+  }
+  .play-hint svg{
+    width:54px;height:54px;
+    opacity:0.85;
+    filter:drop-shadow(0 4px 16px rgba(0,0,0,0.5));
+  }
+
+  /* ===== Floating round buttons on the card ===== */
+  .round-btn{
+    position:absolute;
+    top:max(14px, env(safe-area-inset-top));
+    width:38px;height:38px;
+    border-radius:50%;
+    background:rgba(11,14,17,0.55);
+    border:1px solid rgba(245,243,238,0.18);
+    color:var(--text);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    z-index:5;
+    backdrop-filter:blur(4px);
+  }
+  .round-btn svg{width:18px;height:18px;}
+  .sound-toggle{right:14px;}
+  .clip-toggle{left:14px;}
+  .clip-toggle.active{
+    color:var(--spike);
+    border-color:rgba(212,255,61,0.5);
+  }
+
+  /* ===== Autoplay progress bar ===== */
+  .autoplay-progress{
+    position:absolute;
+    top:0;left:0;right:0;
+    height:3px;
+    background:rgba(245,243,238,0.12);
+    z-index:6;
+  }
+  .autoplay-progress .fill{
+    height:100%;
+    width:0%;
+    background:var(--spike);
+    transition:width .2s linear;
+  }
+
+  /* ===== Overlay info ===== */
+  .overlay{
+    position:absolute;
+    left:0;right:0;bottom:0;
+    padding:18px 16px max(18px, env(safe-area-inset-bottom)) 16px;
+    background:linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 45%, transparent 100%);
+    display:flex;
+    align-items:flex-end;
+    gap:12px;
+  }
+  .overlay-main{flex:1;min-width:0;}
+
+  .eyebrow{
+    font-family:var(--font-display);
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--spike);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:8px;
+    font-weight:700;
+  }
+  .eyebrow.hot{color:var(--hot);}
+  .eyebrow .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:currentColor;
+    animation:blink 1s ease-in-out infinite;
+  }
+
+  .genre-pill{
+    font-family:var(--font-display);
+    font-size:10px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    border:1px solid rgba(245,243,238,0.18);
+    border-radius:999px;
+    padding:2px 8px;
+    margin-bottom:8px;
+    display:inline-block;
+  }
+
+  .channel{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-bottom:4px;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+  }
+  .title{
+    font-size:15px;
+    font-weight:700;
+    line-height:1.45;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .stats{
+    font-family:var(--font-display);
+    font-size:11px;
+    color:var(--text-dim);
+    margin-top:8px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  /* ===== Spike meter ===== */
+  .spike-meter{
+    display:flex;
+    align-items:flex-end;
+    gap:3px;
+    height:46px;
+    flex-shrink:0;
+    padding-bottom:4px;
+  }
+  .spike-meter .bar{
+    width:5px;
+    border-radius:3px;
+    background:var(--spike);
+    transform-origin:bottom;
+    animation:pulse ease-in-out infinite;
+  }
+  .spike-meter.hot .bar{background:var(--hot);}
+
+  @keyframes pulse{
+    0%,100%{transform:scaleY(0.25);}
+    50%{transform:scaleY(1);}
+  }
+  @keyframes blink{
+    0%,100%{opacity:1;}
+    50%{opacity:0.25;}
+  }
+
+  /* ===== Status screens ===== */
+  .status{
+    position:fixed;inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    text-align:center;
+    padding:24px;
+    z-index:100;
+  }
+  .status.hidden{display:none;}
+  .status .big{
+    font-family:var(--font-display);
+    font-size:14px;
+    letter-spacing:0.1em;
+    color:var(--spike);
+  }
+  .status p{
+    color:var(--text-dim);
+    font-size:13px;
+    max-width:320px;
+    line-height:1.7;
+  }
+  .spinner{
+    width:28px;height:28px;
+    border:2px solid rgba(212,255,61,0.25);
+    border-top-color:var(--spike);
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .updated{
+    position:fixed;
+    bottom:max(10px, env(safe-area-inset-bottom));
+    left:14px;
+    font-family:var(--font-display);
+    font-size:10px;
+    color:rgba(245,243,238,0.35);
+    z-index:40;
+    pointer-events:none;
+  }
+
+  /* ===== Toast ===== */
+  .toast{
+    position:fixed;
+    top:max(64px, calc(env(safe-area-inset-top) + 56px));
+    left:50%;
+    transform:translateX(-50%) translateY(-8px);
+    background:var(--surface);
+    border:1px solid rgba(212,255,61,0.4);
+    color:var(--text);
+    font-size:12.5px;
+    font-family:var(--font-display);
+    padding:10px 18px;
+    border-radius:999px;
+    z-index:150;
+    box-shadow:0 10px 30px -10px rgba(0,0,0,0.6);
+    opacity:0;
+    transition:opacity .3s, transform .3s;
+    pointer-events:none;
+    white-space:nowrap;
+    max-width:90vw;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  /* ===== Modal (genre settings) ===== */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(11,14,17,0.78);
+    backdrop-filter:blur(4px);
+    z-index:200;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .modal-overlay.hidden{display:none;}
+  .modal{
+    background:var(--surface);
+    border:1px solid rgba(245,243,238,0.1);
+    border-radius:20px;
+    padding:24px;
+    max-width:380px;
+    width:100%;
+    max-height:80vh;
+    overflow-y:auto;
+  }
+  .modal h2{
+    font-family:var(--font-display);
+    font-size:14px;
+    letter-spacing:0.06em;
+    color:var(--spike);
+    margin-bottom:8px;
+  }
+  .modal p{
+    font-size:12.5px;
+    color:var(--text-dim);
+    line-height:1.7;
+    margin-bottom:18px;
+  }
+  .pill-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:22px;
+  }
+  .pill-choice{
+    font-family:var(--font-display);
+    font-size:11px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid rgba(245,243,238,0.18);
+    background:rgba(11,14,17,0.4);
+    color:var(--text-dim);
+    cursor:pointer;
+  }
+  .pill-choice.selected{
+    background:var(--spike);
+    border-color:var(--spike);
+    color:var(--bg);
+    font-weight:700;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+  }
+  .modal-actions button{
+    flex:1;
+    font-family:var(--font-display);
+    font-size:12px;
+    letter-spacing:0.05em;
+    padding:12px;
+    border-radius:12px;
+    border:1px solid rgba(245,243,238,0.18);
+    background:transparent;
+    color:var(--text);
+    cursor:pointer;
+  }
+  .modal-actions .primary{
+    background:var(--spike);
+    border-color:var(--spike);
+    color:var(--bg);
+    font-weight:700;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="logo"><span class="accent">⚡</span>BUZZ<span class="accent">SHORTS</span></div>
+      <button class="icon-btn streak" id="streakBadge" type="button">🔥 0</button>
+      <div class="topbar-spacer"></div>
+      <button class="icon-btn" id="autoplayBtn" type="button">▶▶</button>
+      <button class="icon-btn" id="sortBtn" type="button">⚡</button>
+      <button class="icon-btn" id="settingsBtn" type="button">⚙</button>
+      <button class="icon-btn" id="langToggle" type="button">EN</button>
+    </div>
+    <div class="topbar-row">
+      <nav class="genre-tabs" id="genreTabs"></nav>
+    </div>
+  </div>
+
+  <main class="feed" id="feed"></main>
+
+  <div class="status" id="loadingStatus">
+    <div class="spinner"></div>
+    <div class="big" id="loadingLabel">LOADING SIGNAL...</div>
+  </div>
+
+  <div class="status hidden" id="emptyStatus">
+    <div class="big">NO SIGNAL</div>
+    <p id="emptyLabel"></p>
+  </div>
+
+  <div class="updated" id="updatedAt"></div>
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-overlay hidden" id="genreModal">
+    <div class="modal">
+      <h2 id="modalTitle">GENRE SETTINGS</h2>
+      <p id="modalDesc"></p>
+      <div class="pill-grid" id="modalPills"></div>
+      <div class="modal-actions">
+        <button id="modalSkip"></button>
+        <button class="primary" id="modalSave"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+  /* =========================================================
+     BUZZ SHORTS
+     登録者数に対して再生数が異常に伸びているShortsだけを
+     縦スクロールフィードで表示するサイト本体
+     ========================================================= */
+
+  // ---- ジャンル一覧 -------------------------------------------
+  const GENRES = [
+    {id:'all',     ja:'すべて',     en:'All'},
+    {id:'game',    ja:'ゲーム',     en:'Gaming'},
+    {id:'cooking', ja:'料理',       en:'Cooking'},
+    {id:'pets',    ja:'ペット',     en:'Pets'},
+    {id:'comedy',  ja:'コメディ',   en:'Comedy'},
+    {id:'beauty',  ja:'美容',       en:'Beauty'},
+    {id:'music',   ja:'音楽',       en:'Music'},
+    {id:'sports',  ja:'スポーツ',   en:'Sports'},
+    {id:'talk',    ja:'雑談',       en:'Talk'},
+    {id:'other',   ja:'その他',     en:'Other'},
+  ];
+
+  // 並び替えモード
+  const SORT_MODES = ['spike', 'new', 'views'];
+  const SORT_ICON = {spike:'⚡', new:'🆕', views:'👁'};
+
+  // 観測ストリークの称号テーブル（しきい値: 称号）
+  const STREAK_TIERS = {
+    ja: [[1,'観測員見習い'],[3,'観測員'],[7,'観測員 Lv.2'],[14,'主任観測員'],[30,'伝説の観測員']],
+    en: [[1,'Trainee Observer'],[3,'Observer'],[7,'Observer Lv.2'],[14,'Senior Observer'],[30,'Legendary Observer']],
+  };
+
+  const I18N = {
+    ja: {
+      loading: '信号を観測中...',
+      empty: 'このジャンルでは、今のところ急上昇している動画が見つかりませんでした。',
+      clipsEmpty: '保存した動画はまだないよ。🔖アイコンで気になる動画をクリップしてみよう。',
+      heroLabel: '本日最大の急上昇',
+      spike: (n) => `通常の ${n}倍 再生中`,
+      hoursAgo: (h) => h < 1 ? 'たった今' : `${h}時間前`,
+      views: (n) => `${n} 回視聴`,
+      subs: (n) => `登録者 ${n}人`,
+      updated: (s) => `最終更新: ${s}`,
+      langBtn: 'EN',
+      myFeed: '📌 マイフィード',
+      clips: '🔖 クリップ',
+      sortNames: {spike:'急上昇順', new:'新着順', views:'再生数順'},
+      modalTitle: '好きなジャンルを選んでね',
+      modalDesc: '選んだジャンルをまとめて見られる「マイフィード」を作るよ。あとで⚙アイコンから変更できます。',
+      modalSave: '保存してマイフィードを作る',
+      modalSkip: 'あとで設定する',
+      streakToast: (n, title) => `🔥 ${n}日連続観測中！「${title}」になったよ`,
+      autoplayOn: '🔁 自動送りON',
+      autoplayOff: '⏸ 自動送りOFF',
+    },
+    en: {
+      loading: 'Scanning for spikes...',
+      empty: 'No spiking videos found in this genre right now.',
+      clipsEmpty: 'No saved videos yet. Tap the 🔖 icon to save ones you like.',
+      heroLabel: "Today's biggest spike",
+      spike: (n) => `${n}x normal views`,
+      hoursAgo: (h) => h < 1 ? 'just now' : `${h}h ago`,
+      views: (n) => `${n} views`,
+      subs: (n) => `${n} subs`,
+      updated: (s) => `Last updated: ${s}`,
+      langBtn: 'JP',
+      myFeed: '📌 My Feed',
+      clips: '🔖 Saved',
+      sortNames: {spike:'Spike', new:'New', views:'Views'},
+      modalTitle: 'Pick your favorite genres',
+      modalDesc: 'We\'ll build a "My Feed" that combines the genres you pick. You can change this anytime from the ⚙ icon.',
+      modalSave: 'Save & build My Feed',
+      modalSkip: 'Maybe later',
+      streakToast: (n, title) => `🔥 ${n}-day streak! You're now "${title}"`,
+      autoplayOn: '🔁 Autoplay ON',
+      autoplayOff: '⏸ Autoplay OFF',
+    }
+  };
+
+  // ---- state -------------------------------------------------
+  let LANG = localStorage.getItem('buzzshorts_lang') || (navigator.language?.startsWith('ja') ? 'ja' : 'en');
+  let MUTED = localStorage.getItem('buzzshorts_muted') !== 'false'; // デフォルトはミュート
+  let currentGenre = 'all';
+  let allVideos = [];
+  let ytReady = false;
+  let activePlayer = null;
+  let activeCardId = null;
+  let pendingActivate = null;
+
+  let sortMode = localStorage.getItem('buzzshorts_sort') || 'spike';
+  if(!SORT_MODES.includes(sortMode)) sortMode = 'spike';
+
+  let autoplayChain = localStorage.getItem('buzzshorts_autoplay') !== 'false'; // デフォルトON
+  let progressTimer = null;
+
+  let favoriteGenres = [];
+  try{ favoriteGenres = JSON.parse(localStorage.getItem('buzzshorts_favorites') || '[]'); }catch(e){ favoriteGenres = []; }
+
+  let clips = [];
+  try{ clips = JSON.parse(localStorage.getItem('buzzshorts_clips') || '[]'); }catch(e){ clips = []; }
+
+  let modalPillSelection = new Set(favoriteGenres);
+
+  const feedEl = document.getElementById('feed');
+  const tabsEl = document.getElementById('genreTabs');
+  const langBtn = document.getElementById('langToggle');
+  const sortBtn = document.getElementById('sortBtn');
+  const autoplayBtn = document.getElementById('autoplayBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const streakBadge = document.getElementById('streakBadge');
+  const loadingStatus = document.getElementById('loadingStatus');
+  const loadingLabel = document.getElementById('loadingLabel');
+  const emptyStatus = document.getElementById('emptyStatus');
+  const emptyLabel = document.getElementById('emptyLabel');
+  const updatedAtEl = document.getElementById('updatedAt');
+  const toastEl = document.getElementById('toast');
+
+  const genreModal = document.getElementById('genreModal');
+  const modalTitleEl = document.getElementById('modalTitle');
+  const modalDescEl = document.getElementById('modalDesc');
+  const modalPillsEl = document.getElementById('modalPills');
+  const modalSaveBtn = document.getElementById('modalSave');
+  const modalSkipBtn = document.getElementById('modalSkip');
+
+  function t(key, ...args){
+    const fn = I18N[LANG][key];
+    return typeof fn === 'function' ? fn(...args) : fn;
+  }
+
+  function formatNumber(n){
+    n = Number(n) || 0;
+    if(LANG === 'ja'){
+      if(n >= 100000000) return (n/100000000).toFixed(1).replace(/\.0$/,'') + '億';
+      if(n >= 10000) return (n/10000).toFixed(1).replace(/\.0$/,'') + '万';
+      return n.toLocaleString('ja-JP');
+    }
+    if(n >= 1000000) return (n/1000000).toFixed(1).replace(/\.0$/,'') + 'M';
+    if(n >= 1000) return (n/1000).toFixed(1).replace(/\.0$/,'') + 'K';
+    return n.toLocaleString('en-US');
+  }
+
+  function hoursAgo(iso){
+    const diff = Date.now() - new Date(iso).getTime();
+    return Math.max(0, Math.floor(diff / 3600000));
+  }
+
+  // ---- toast ----------------------------------------------------
+  let toastTimer = null;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4000);
+  }
+
+  // ---- 観測ストリーク ---------------------------------------------
+  function streakTitleFor(count){
+    const tiers = STREAK_TIERS[LANG];
+    let title = tiers[0][1];
+    for(const [threshold, label] of tiers){
+      if(count >= threshold) title = label;
+    }
+    return title;
+  }
+
+  function updateStreak(){
+    const todayStr = new Date().toDateString();
+    const lastVisit = localStorage.getItem('buzzshorts_last_visit');
+    let streak = Number(localStorage.getItem('buzzshorts_streak') || '0');
+    let increased = false;
+
+    if(lastVisit !== todayStr){
+      if(lastVisit){
+        const diffDays = Math.round((new Date(todayStr) - new Date(lastVisit)) / 86400000);
+        streak = diffDays === 1 ? streak + 1 : 1;
+      } else {
+        streak = 1;
+      }
+      increased = true;
+      localStorage.setItem('buzzshorts_last_visit', todayStr);
+      localStorage.setItem('buzzshorts_streak', String(streak));
+    }
+
+    streakBadge.textContent = `🔥 ${streak}`;
+    if(increased){
+      showToast(t('streakToast', streak, streakTitleFor(streak)));
+    }
+  }
+
+  // ---- クリップ（あとで見る） --------------------------------------
+  function isClipped(id){
+    return clips.some(c => c.id === id);
+  }
+  function toggleClip(video){
+    const idx = clips.findIndex(c => c.id === video.id);
+    if(idx >= 0){
+      clips.splice(idx, 1);
+    } else {
+      clips.unshift({...video, savedAt: Date.now()});
+    }
+    localStorage.setItem('buzzshorts_clips', JSON.stringify(clips));
+    if(currentGenre === 'clips'){
+      renderFeed();
+    }
+  }
+
+  // ---- genre tabs ---------------------------------------------
+  function renderTabs(){
+    tabsEl.innerHTML = '';
+
+    const specials = [];
+    if(favoriteGenres.length > 0){
+      specials.push({id:'myfeed', label: t('myFeed'), special:true});
+    }
+    specials.push({id:'clips', label: t('clips'), special:true});
+
+    specials.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'genre-tab special' + (s.id === currentGenre ? ' active' : '');
+      btn.textContent = s.label;
+      btn.addEventListener('click', () => {
+        currentGenre = s.id;
+        renderTabs();
+        renderFeed();
+      });
+      tabsEl.appendChild(btn);
+    });
+
+    GENRES.forEach(g => {
+      const present = g.id === 'all' || allVideos.some(v => v.genre === g.id);
+      if(!present) return;
+      const btn = document.createElement('button');
+      btn.className = 'genre-tab' + (g.id === currentGenre ? ' active' : '');
+      btn.textContent = g[LANG];
+      btn.addEventListener('click', () => {
+        currentGenre = g.id;
+        renderTabs();
+        renderFeed();
+      });
+      tabsEl.appendChild(btn);
+    });
+  }
+
+  // ---- spike meter bars -----------------------------------------
+  function spikeMeterHTML(ratio, isHero){
+    const bars = 5;
+    let html = `<div class="spike-meter${isHero ? ' hot' : ''}">`;
+    for(let i = 0; i < bars; i++){
+      // 比率が高いほど速いパルス。少しランダムにずらして「生きてる」感を出す
+      const speed = Math.max(0.45, 1.6 - (ratio / 60) - i * 0.07);
+      const delay = (i * 0.08).toFixed(2);
+      html += `<div class="bar" style="animation-duration:${speed.toFixed(2)}s; animation-delay:-${delay}s;"></div>`;
+    }
+    html += `</div>`;
+    return html;
+  }
+
+  // ---- card ------------------------------------------------------
+  function buildCard(video, isHero){
+    const card = document.createElement('section');
+    card.className = 'card';
+    card.dataset.videoId = video.id;
+
+    const genreLabel = GENRES.find(g => g.id === video.genre)?.[LANG] || video.genre;
+    const ratio = Math.max(1, Math.round(video.growthRatio || (video.viewCount / Math.max(video.subscriberCount, 1))));
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="autoplay-progress"><div class="fill"></div></div>
+        <div class="media">
+          <img src="${video.thumbnail}" alt="" loading="lazy">
+          <div class="play-hint">
+            <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+        <button class="round-btn clip-toggle${isClipped(video.id) ? ' active' : ''}" aria-label="save">
+          ${clipIcon(isClipped(video.id))}
+        </button>
+        <button class="round-btn sound-toggle" aria-label="toggle sound">
+          ${soundIcon()}
+        </button>
+        <div class="overlay">
+          <div class="overlay-main">
+            <div class="eyebrow${isHero ? ' hot' : ''}">
+              <span class="dot"></span>
+              ${isHero ? t('heroLabel') + ' · ' : ''}${t('spike', ratio)}
+            </div>
+            <div class="genre-pill">${genreLabel}</div>
+            <div class="channel">${escapeHTML(video.channelTitle)} · ${t('hoursAgo', hoursAgo(video.publishedAt))}</div>
+            <div class="title">${escapeHTML(video.title)}</div>
+            <div class="stats">
+              <span>${t('views', formatNumber(video.viewCount))}</span>
+              <span>${t('subs', formatNumber(video.subscriberCount))}</span>
+            </div>
+          </div>
+          ${spikeMeterHTML(ratio, isHero)}
+        </div>
+      </div>
+    `;
+
+    card.querySelector('.sound-toggle').addEventListener('click', (e) => {
+      e.stopPropagation();
+      MUTED = !MUTED;
+      localStorage.setItem('buzzshorts_muted', MUTED);
+      card.querySelector('.sound-toggle').innerHTML = soundIcon();
+      if(activePlayer && activeCardId === video.id){
+        MUTED ? activePlayer.mute() : activePlayer.unMute();
+      }
+    });
+
+    card.querySelector('.clip-toggle').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleClip(video);
+      const btn = card.querySelector('.clip-toggle');
+      const nowClipped = isClipped(video.id);
+      btn.classList.toggle('active', nowClipped);
+      btn.innerHTML = clipIcon(nowClipped);
+    });
+
+    return card;
+  }
+
+  function soundIcon(){
+    return MUTED
+      ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4Z"/><path d="M3 9v6h4l5 5V4L7 9H3Z"/><path d="M19.5 4.5l-15 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3Z"/><path d="M16.5 12A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4Z"/><path d="M19 5a8 8 0 0 1 0 14" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>`;
+  }
+
+  function clipIcon(active){
+    return active
+      ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V3.5a1 1 0 0 1 1-1Z"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2.5h12a1 1 0 0 1 1 1V21l-7-4.5L5 21V3.5a1 1 0 0 1 1-1Z" stroke-linejoin="round"/></svg>`;
+  }
+
+  function escapeHTML(s){
+    const div = document.createElement('div');
+    div.textContent = s ?? '';
+    return div.innerHTML;
+  }
+
+  // ---- feed rendering -----------------------------------------
+  function renderFeed(){
+    feedEl.innerHTML = '';
+
+    let list;
+    let allowHero = false;
+
+    if(currentGenre === 'clips'){
+      list = clips.slice(); // 保存した順（新しい順）のまま
+    } else if(currentGenre === 'myfeed'){
+      list = allVideos.filter(v => favoriteGenres.includes(v.genre));
+      allowHero = true;
+    } else if(currentGenre === 'all'){
+      list = allVideos.slice();
+      allowHero = true;
+    } else {
+      list = allVideos.filter(v => v.genre === currentGenre);
+    }
+
+    // クリップタブは保存した順を保持。それ以外は選択中の並び替えモードを適用
+    if(currentGenre !== 'clips'){
+      if(sortMode === 'new'){
+        list.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+      } else if(sortMode === 'views'){
+        list.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+      } else {
+        list.sort((a, b) => (b.growthRatio || 0) - (a.growthRatio || 0));
+      }
+    }
+
+    if(list.length === 0){
+      emptyLabel.textContent = currentGenre === 'clips' ? t('clipsEmpty') : t('empty');
+      emptyStatus.classList.remove('hidden');
+      return;
+    }
+    emptyStatus.classList.add('hidden');
+
+    list.forEach((video, i) => {
+      const isHero = allowHero && sortMode === 'spike' && i === 0;
+      feedEl.appendChild(buildCard(video, isHero));
+    });
+
+    feedEl.scrollTop = 0;
+    setupObserver();
+  }
+
+  // ---- YouTube player control -----------------------------------
+  function onYouTubeIframeAPIReady(){
+    ytReady = true;
+    if(pendingActivate){
+      activateCard(pendingActivate);
+      pendingActivate = null;
+    }
+  }
+  window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+  function activateCard(card){
+    if(!ytReady){ pendingActivate = card; return; }
+    const videoId = card.dataset.videoId;
+    if(activeCardId === videoId) return;
+    deactivateCurrent();
+
+    const media = card.querySelector('.media');
+    const img = media.querySelector('img');
+    const hint = media.querySelector('.play-hint');
+    if(img) img.style.display = 'none';
+    if(hint) hint.style.display = 'none';
+
+    const holder = document.createElement('div');
+    media.appendChild(holder);
+
+    const playerVars = {
+      autoplay:1, mute: MUTED ? 1 : 0,
+      playsinline:1, controls:1, rel:0, modestbranding:1
+    };
+    if(!autoplayChain){
+      playerVars.loop = 1;
+      playerVars.playlist = videoId; // loop:1には同じ動画IDのplaylistが必須
+    }
+
+    activePlayer = new YT.Player(holder, {
+      videoId,
+      playerVars,
+      events:{
+        onReady:(e) => {
+          MUTED ? e.target.mute() : e.target.unMute();
+          e.target.playVideo();
+        },
+        onStateChange:(e) => {
+          if(e.data === YT.PlayerState.PLAYING){
+            startProgressTimer(card, e.target);
+          } else if(e.data === YT.PlayerState.ENDED){
+            stopProgressTimer();
+            if(autoplayChain){
+              goToNextCard(card);
+            }
+          } else {
+            stopProgressTimer();
+          }
+        }
+      }
+    });
+    activeCardId = videoId;
+  }
+
+  function startProgressTimer(card, player){
+    stopProgressTimer();
+    const fill = card.querySelector('.autoplay-progress .fill');
+    if(!fill) return;
+    progressTimer = setInterval(() => {
+      try{
+        const duration = player.getDuration();
+        const current = player.getCurrentTime();
+        if(duration > 0){
+          fill.style.width = Math.min(100, (current / duration) * 100) + '%';
+        }
+      }catch(err){ /* プレイヤー破棄直後の呼び出しは無視 */ }
+    }, 200);
+  }
+
+  function stopProgressTimer(){
+    if(progressTimer){
+      clearInterval(progressTimer);
+      progressTimer = null;
+    }
+  }
+
+  function goToNextCard(card){
+    const next = card.nextElementSibling;
+    if(next){
+      next.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }
+
+  function deactivateCurrent(){
+    if(!activePlayer) return;
+    stopProgressTimer();
+    try{ activePlayer.destroy(); }catch(err){}
+    activePlayer = null;
+
+    if(activeCardId){
+      const card = feedEl.querySelector(`.card[data-video-id="${activeCardId}"]`);
+      if(card){
+        const media = card.querySelector('.media');
+        const img = media.querySelector('img');
+        const hint = media.querySelector('.play-hint');
+        const holder = media.querySelector('div:not(.play-hint)');
+        const fill = card.querySelector('.autoplay-progress .fill');
+        if(holder) holder.remove();
+        if(img) img.style.display = '';
+        if(hint) hint.style.display = '';
+        if(fill) fill.style.width = '0%';
+      }
+    }
+    activeCardId = null;
+  }
+
+  let observer = null;
+  function setupObserver(){
+    if(observer) observer.disconnect();
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting && entry.intersectionRatio > 0.6){
+          activateCard(entry.target);
+        }
+      });
+    }, {root: feedEl, threshold: [0.6]});
+
+    feedEl.querySelectorAll('.card').forEach(card => observer.observe(card));
+  }
+
+  // ---- 並び替え ------------------------------------------------
+  sortBtn.addEventListener('click', () => {
+    const idx = SORT_MODES.indexOf(sortMode);
+    sortMode = SORT_MODES[(idx + 1) % SORT_MODES.length];
+    localStorage.setItem('buzzshorts_sort', sortMode);
+    applySortBtnLabel();
+    showToast(t('sortNames')[sortMode]);
+    renderFeed();
+  });
+
+  function applySortBtnLabel(){
+    sortBtn.innerHTML = SORT_ICON[sortMode];
+    sortBtn.title = t('sortNames')[sortMode];
+  }
+
+  // ---- 自動送り --------------------------------------------------
+  autoplayBtn.addEventListener('click', () => {
+    autoplayChain = !autoplayChain;
+    localStorage.setItem('buzzshorts_autoplay', autoplayChain);
+    applyAutoplayBtnLabel();
+    showToast(autoplayChain ? t('autoplayOn') : t('autoplayOff'));
+    // 設定変更を即座に反映するため、現在再生中のプレイヤーを再起動
+    if(activeCardId){
+      const card = feedEl.querySelector(`.card[data-video-id="${activeCardId}"]`);
+      if(card) activateCard(card);
+    }
+  });
+
+  function applyAutoplayBtnLabel(){
+    autoplayBtn.classList.toggle('autoplay-on', autoplayChain);
+  }
+
+  // ---- ジャンル設定モーダル ---------------------------------------
+  function openGenreModal(){
+    modalPillSelection = new Set(favoriteGenres);
+    renderModalPills();
+    applyModalLangUI();
+    genreModal.classList.remove('hidden');
+  }
+  function closeGenreModal(){
+    genreModal.classList.add('hidden');
+  }
+  function renderModalPills(){
+    modalPillsEl.innerHTML = '';
+    GENRES.filter(g => g.id !== 'all').forEach(g => {
+      const btn = document.createElement('button');
+      btn.className = 'pill-choice' + (modalPillSelection.has(g.id) ? ' selected' : '');
+      btn.textContent = g[LANG];
+      btn.addEventListener('click', () => {
+        if(modalPillSelection.has(g.id)) modalPillSelection.delete(g.id);
+        else modalPillSelection.add(g.id);
+        btn.classList.toggle('selected');
+      });
+      modalPillsEl.appendChild(btn);
+    });
+  }
+  function applyModalLangUI(){
+    modalTitleEl.textContent = t('modalTitle');
+    modalDescEl.textContent = t('modalDesc');
+    modalSaveBtn.textContent = t('modalSave');
+    modalSkipBtn.textContent = t('modalSkip');
+  }
+
+  settingsBtn.addEventListener('click', openGenreModal);
+  modalSkipBtn.addEventListener('click', closeGenreModal);
+  modalSaveBtn.addEventListener('click', () => {
+    favoriteGenres = [...modalPillSelection];
+    localStorage.setItem('buzzshorts_favorites', JSON.stringify(favoriteGenres));
+    localStorage.setItem('buzzshorts_onboarded', 'true');
+    closeGenreModal();
+    if(favoriteGenres.length > 0){
+      currentGenre = 'myfeed';
+    }
+    renderTabs();
+    renderFeed();
+  });
+
+  // ---- language toggle ------------------------------------------
+  langBtn.addEventListener('click', () => {
+    LANG = LANG === 'ja' ? 'en' : 'ja';
+    localStorage.setItem('buzzshorts_lang', LANG);
+    applyLangUI();
+    renderTabs();
+    renderFeed();
+  });
+
+  function applyLangUI(){
+    document.documentElement.lang = LANG;
+    langBtn.textContent = t('langBtn');
+    loadingLabel.textContent = t('loading').toUpperCase();
+    applySortBtnLabel();
+    applyAutoplayBtnLabel();
+    if(!genreModal.classList.contains('hidden')) applyModalLangUI();
+  }
+
+  // ---- data load ---------------------------------------------------
+  async function init(){
+    applyLangUI();
+    updateStreak();
+
+    try{
+      const res = await fetch('data/shorts.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('fetch failed');
+      const json = await res.json();
+      allVideos = json.videos || [];
+      if(json.generatedAt){
+        const d = new Date(json.generatedAt);
+        updatedAtEl.textContent = t('updated', d.toLocaleString(LANG === 'ja' ? 'ja-JP' : 'en-US', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}));
+      }
+    }catch(err){
+      allVideos = [];
+    }
+    loadingStatus.classList.add('hidden');
+    renderTabs();
+    renderFeed();
+
+    // 初回訪問ならジャンル設定モーダルを開く
+    if(!localStorage.getItem('buzzshorts_onboarded')){
+      setTimeout(openGenreModal, 500);
+    }
+  }
+
+  init();
+
+  // ---- PWA: サービスワーカー登録 -----------------------------------
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+  </script>
+</body>
+</html>
