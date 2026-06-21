@@ -25,6 +25,8 @@ jobs:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           LOOKBACK_HOURS: '24'
           MAX_PER_GENRE: '15'
+          MIN_SUBSCRIBERS: '1000'
+          MIN_VIEW_COUNT: '1000'
         run: node fetch-shorts.mjs
 
       - name: Commit and push if changed

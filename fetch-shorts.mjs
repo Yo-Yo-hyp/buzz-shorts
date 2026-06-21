@@ -12,8 +12,12 @@
  *   YOUTUBE_API_KEY  ... YouTube Data API v3 のAPIキー（必須）
  *
  * 任意の環境変数:
- *   LOOKBACK_HOURS   ... 何時間以内に投稿された動画を対象にするか（デフォルト24）
- *   MAX_PER_GENRE    ... 各ジャンルから残す件数（デフォルト15）
+ *   LOOKBACK_HOURS     ... 何時間以内に投稿された動画を対象にするか（デフォルト24）
+ *   MAX_PER_GENRE      ... 各ジャンルから残す件数（デフォルト15）
+ *   MIN_SUBSCRIBERS    ... 対象にするチャンネルの最低登録者数（デフォルト1000）
+ *                          無名すぎるチャンネル（登録者数人〜数十人）をノイズとして除外する
+ *   MIN_VIEW_COUNT     ... 対象にする動画の最低再生数（デフォルト1000）
+ *                          再生数が極端に少ない動画は急上昇率が偶然高くなりやすいため除外する
  *
  * クォータの目安:
  *   search.list は1回100ユニット消費。ジャンル×検索語の数だけ
@@ -33,6 +37,8 @@ if (!API_KEY) {
 
 const LOOKBACK_HOURS = Number(process.env.LOOKBACK_HOURS || 24);
 const MAX_PER_GENRE = Number(process.env.MAX_PER_GENRE || 15);
+const MIN_SUBSCRIBERS = Number(process.env.MIN_SUBSCRIBERS || 1000);
+const MIN_VIEW_COUNT = Number(process.env.MIN_VIEW_COUNT || 1000);
 const REGION_CODE = 'JP';
 const OUTPUT_PATH = path.resolve(process.cwd(), 'data', 'shorts.json');
 
@@ -168,6 +174,11 @@ async function main() {
       // 登録者数が非公開・取得不可の動画は急上昇率を計算できないため除外
       if (subscriberCount === null || subscriberCount === undefined) return null;
 
+      // 登録者数・再生数が一定の規模に満たないチャンネル/動画は
+      // 「たまたま」の確率が高くノイズになりやすいため除外する
+      if (subscriberCount < MIN_SUBSCRIBERS) return null;
+      if (viewCount < MIN_VIEW_COUNT) return null;
+
       const growthRatio = Math.round(viewCount / Math.max(subscriberCount, 1));
 
       return {
@@ -184,6 +195,8 @@ async function main() {
       };
     })
     .filter(Boolean);
+
+  console.log(`登録者数${MIN_SUBSCRIBERS}人以上・再生数${MIN_VIEW_COUNT}回以上でフィルタ後: ${videos.length} 件`);
 
   // 6) ジャンルごとに急上昇率が高い順に並べ、上位だけ残す
   const byGenre = new Map();
