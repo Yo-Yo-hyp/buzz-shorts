@@ -216,6 +216,12 @@
   .media iframe{
     width:100%;height:100%;border:0;
     object-fit:cover;
+    pointer-events:none; /* controlsを消してるので、操作はtap-layerに任せる */
+  }
+  .tap-layer{
+    position:absolute;inset:0;
+    z-index:3;
+    background:transparent;
   }
 
   .play-hint{
@@ -232,7 +238,7 @@
   /* ===== Floating round buttons on the card ===== */
   .round-btn{
     position:absolute;
-    top:max(14px, env(safe-area-inset-top));
+    top:max(96px, calc(env(safe-area-inset-top) + 88px));
     width:38px;height:38px;
     border-radius:50%;
     background:rgba(11,14,17,0.55);
@@ -240,7 +246,7 @@
     color:var(--text);
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;
-    z-index:5;
+    z-index:10;
     backdrop-filter:blur(4px);
   }
   .round-btn svg{width:18px;height:18px;}
@@ -257,7 +263,7 @@
     top:0;left:0;right:0;
     height:3px;
     background:rgba(245,243,238,0.12);
-    z-index:6;
+    z-index:4;
   }
   .autoplay-progress .fill{
     height:100%;
@@ -275,6 +281,7 @@
     display:flex;
     align-items:flex-end;
     gap:12px;
+    z-index:8;
   }
   .overlay-main{flex:1;min-width:0;}
 
@@ -853,6 +860,7 @@
           <div class="play-hint">
             <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
           </div>
+          <div class="tap-layer"></div>
         </div>
         <button class="round-btn clip-toggle${isClipped(video.id) ? ' active' : ''}" aria-label="save">
           ${clipIcon(isClipped(video.id))}
@@ -992,7 +1000,7 @@
 
     const playerVars = {
       autoplay:1, mute: MUTED ? 1 : 0,
-      playsinline:1, controls:1, rel:0, modestbranding:1
+      playsinline:1, controls:0, rel:0, modestbranding:1, disablekb:1
     };
     if(!autoplayChain){
       playerVars.loop = 1;
@@ -1022,6 +1030,16 @@
       }
     });
     activeCardId = videoId;
+
+    // controlsを消した分、動画部分タップで再生/一時停止できるようにする
+    holder.style.pointerEvents = 'none'; // iframe自体はタップを奪わない
+    const tapLayer = media.querySelector('.tap-layer');
+    if(tapLayer) tapLayer.onclick = () => {
+      if(!activePlayer) return;
+      const state = activePlayer.getPlayerState();
+      if(state === YT.PlayerState.PLAYING) activePlayer.pauseVideo();
+      else activePlayer.playVideo();
+    };
   }
 
   function startProgressTimer(card, player){

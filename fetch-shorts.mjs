@@ -42,20 +42,58 @@ const MIN_VIEW_COUNT = Number(process.env.MIN_VIEW_COUNT || 1000);
 const REGION_CODE = 'JP';
 const OUTPUT_PATH = path.resolve(process.cwd(), 'data', 'shorts.json');
 
-// ジャンルごとの検索キーワード。
-// 日本語の "#shorts" 系キーワードでJPリージョンの動画を絞り込む。
+// ジャンルごとの検索キーワードと、タイトル/説明文に含まれているべき
+// チェック用キーワード（誤分類を防ぐための二重チェック）。
+// matchKeywords のうち1つでもタイトル or 説明文に含まれていればそのジャンルと判定する。
 const GENRES = [
-  { id: 'game',    query: 'ゲーム実況 #shorts' },
-  { id: 'cooking', query: '簡単レシピ #shorts' },
-  { id: 'pets',    query: '犬 猫 #shorts' },
-  { id: 'comedy',  query: 'あるある #shorts' },
-  { id: 'beauty',  query: 'メイク #shorts' },
-  { id: 'music',   query: '弾いてみた #shorts' },
-  { id: 'sports',  query: 'スポーツ #shorts' },
-  { id: 'talk',    query: '雑談 #shorts' },
+  {
+    id: 'game', query: 'ゲーム実況 #shorts',
+    matchKeywords: ['ゲーム', 'プレイ', '実況', 'クリア', 'ボス', 'RTA', 'eスポーツ'],
+  },
+  {
+    id: 'cooking', query: '簡単レシピ #shorts',
+    matchKeywords: ['レシピ', '料理', '作り方', 'クッキング', 'ごはん', '飯', '食材', 'おかず'],
+  },
+  {
+    id: 'pets', query: '犬 猫 #shorts',
+    matchKeywords: ['犬', '猫', 'ねこ', 'いぬ', 'ペット', '動物', 'わんこ', 'にゃんこ'],
+  },
+  {
+    id: 'comedy', query: 'あるある #shorts',
+    matchKeywords: ['あるある', '笑', 'コント', 'ネタ', 'ボケ', 'ツッコミ', 'お笑い'],
+  },
+  {
+    id: 'beauty', query: 'メイク 美容 #shorts',
+    matchKeywords: ['メイク', '美容', 'コスメ', 'スキンケア', 'ヘアアレンジ', '化粧'],
+  },
+  {
+    id: 'music', query: '弾いてみた 歌ってみた #shorts',
+    matchKeywords: ['弾いてみた', '歌ってみた', 'カバー', 'ギター', 'ピアノ', '演奏', '作曲', 'Cover'],
+  },
+  {
+    id: 'sports', query: 'スポーツ 筋トレ #shorts',
+    matchKeywords: ['サッカー', '野球', 'バスケ', 'スポーツ', '筋トレ', 'トレーニング', 'リフティング'],
+  },
+  {
+    id: 'talk', query: '雑談 あるある話 #shorts',
+    matchKeywords: ['雑談', '話', 'トーク', '相談', 'エピソード'],
+  },
 ];
 
 const SEARCH_RESULTS_PER_GENRE = 25;
+
+// 日本語（ひらがな・カタカナ・漢字）の文字が含まれているかを判定する。
+// 海外勢の動画やローマ字のみのタイトルを弾くための簡易フィルタ。
+function containsJapanese(text){
+  return /[\u3040-\u30FF\u4E00-\u9FFF]/.test(text || '');
+}
+
+// タイトル・説明文にジャンルのキーワードが実際に含まれているか確認する。
+// 検索結果には関連度の低い動画も混じるため、ここで二重チェックする。
+function matchesGenre(genre, title, description){
+  const text = `${title} ${description}`;
+  return genre.matchKeywords.some(kw => text.includes(kw));
+}
 
 // ---------------------------------------------------------------
 // ヘルパー
@@ -114,13 +152,25 @@ async function main() {
         maxResults: SEARCH_RESULTS_PER_GENRE,
         safeSearch: 'moderate',
       });
+
+      let matched = 0;
       for (const item of data.items || []) {
         const id = item.id?.videoId;
-        if (id && !videoGenreMap.has(id)) {
-          videoGenreMap.set(id, genre.id);
-        }
+        const title = item.snippet?.title || '';
+        const description = item.snippet?.description || '';
+        if (!id || videoGenreMap.has(id)) continue;
+
+        // 日本語が含まれていない動画（海外勢など）はここで除外
+        if (!containsJapanese(title)) continue;
+
+        // タイトル/説明文にジャンルキーワードが含まれているかチェック
+        // （検索結果には関連度の低い動画も混じるため）
+        if (!matchesGenre(genre, title, description)) continue;
+
+        videoGenreMap.set(id, genre.id);
+        matched++;
       }
-      console.log(`[${genre.id}] ${data.items?.length || 0} 件取得`);
+      console.log(`[${genre.id}] ${data.items?.length || 0} 件取得 → ジャンル一致 ${matched} 件`);
     } catch (err) {
       console.error(`[${genre.id}] 検索に失敗: ${err.message}`);
     }
