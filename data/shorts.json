@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-21T11:05:21.636Z",
+  "generatedAt": "2026-06-21T14:24:22.118Z",
   "videos": [
     {
       "id": "O7kksmmbzO4",
@@ -8,46 +8,10 @@
       "channelId": "UCnM7IAaYlGEtjEPn006D7WQ",
       "genre": "comedy",
       "publishedAt": "2026-06-21T04:00:34Z",
-      "viewCount": 65473,
+      "viewCount": 144285,
       "subscriberCount": 10700,
-      "growthRatio": 6,
+      "growthRatio": 13,
       "thumbnail": "https://i.ytimg.com/vi/O7kksmmbzO4/hqdefault.jpg"
-    },
-    {
-      "id": "bcSCIU8Tjd4",
-      "title": "この少女はもしかして？ #shorts #妖怪ウォッチ #妖怪ウォッチぷにぷに #妖怪ウォッチ2真打 #ゲーム実況 #妖怪ウォッチアニメ",
-      "channelTitle": "マガイモノ【ゲーム実況】",
-      "channelId": "UCkC54egUKezLhMF86s7njmA",
-      "genre": "game",
-      "publishedAt": "2026-06-20T14:00:20Z",
-      "viewCount": 39659,
-      "subscriberCount": 14700,
-      "growthRatio": 3,
-      "thumbnail": "https://i.ytimg.com/vi/bcSCIU8Tjd4/hqdefault.jpg"
-    },
-    {
-      "id": "VfUZtH4UdS0",
-      "title": "【小学生あるある】小学生の頃友達と遊ぶ時に起こること #shorts #小学生あるある #あるある #懐かしい #小学校あるある #学校あるある #平成 #平成レトロ #平成男児",
-      "channelTitle": "あるある市立りょうじ小学校",
-      "channelId": "UCbZsdrJZSG8YhQtz-sNWRUg",
-      "genre": "comedy",
-      "publishedAt": "2026-06-20T12:15:31Z",
-      "viewCount": 703140,
-      "subscriberCount": 201000,
-      "growthRatio": 3,
-      "thumbnail": "https://i.ytimg.com/vi/VfUZtH4UdS0/hqdefault.jpg"
-    },
-    {
-      "id": "LRM5pmug4uk",
-      "title": "【ショートコント】高田健志伝説#あるある #お笑い #コント#shorts",
-      "channelTitle": "ミラクルST計画",
-      "channelId": "UCo7iaHAXV0WAUXO9Q67XE6Q",
-      "genre": "comedy",
-      "publishedAt": "2026-06-21T03:10:01Z",
-      "viewCount": 497497,
-      "subscriberCount": 196000,
-      "growthRatio": 3,
-      "thumbnail": "https://i.ytimg.com/vi/LRM5pmug4uk/hqdefault.jpg"
     },
     {
       "id": "mt45Q-zGcKg",
@@ -56,22 +20,22 @@
       "channelId": "UC--AmGNDtmX4SKQx5jtUl4A",
       "genre": "comedy",
       "publishedAt": "2026-06-20T22:00:08Z",
-      "viewCount": 59760,
+      "viewCount": 70542,
       "subscriberCount": 19600,
-      "growthRatio": 3,
+      "growthRatio": 4,
       "thumbnail": "https://i.ytimg.com/vi/mt45Q-zGcKg/hqdefault.jpg"
     },
     {
-      "id": "nhv6QfqBFac",
-      "title": "Ferins帰還！新要素大ニュース全部まとめてみた！#shorts #フォートナイト #ゆっくり実況 #fortnite",
-      "channelTitle": "すらぁ【ゆっくり実況】",
-      "channelId": "UCo1_0_CkxNJAaWwjVuIMpmg",
-      "genre": "game",
-      "publishedAt": "2026-06-21T00:10:30Z",
-      "viewCount": 55845,
-      "subscriberCount": 59000,
-      "growthRatio": 1,
-      "thumbnail": "https://i.ytimg.com/vi/nhv6QfqBFac/hqdefault.jpg"
+      "id": "LRM5pmug4uk",
+      "title": "【ショートコント】高田健志伝説#あるある #お笑い #コント#shorts",
+      "channelTitle": "ミラクルST計画",
+      "channelId": "UCo7iaHAXV0WAUXO9Q67XE6Q",
+      "genre": "comedy",
+      "publishedAt": "2026-06-21T03:10:01Z",
+      "viewCount": 613350,
+      "subscriberCount": 196000,
+      "growthRatio": 3,
+      "thumbnail": "https://i.ytimg.com/vi/LRM5pmug4uk/hqdefault.jpg"
     },
     {
       "id": "8IO0hxr9CIQ",
@@ -80,10 +44,94 @@
       "channelId": "UCo7iaHAXV0WAUXO9Q67XE6Q",
       "genre": "comedy",
       "publishedAt": "2026-06-21T08:00:26Z",
-      "viewCount": 196695,
+      "viewCount": 563233,
+      "subscriberCount": 196000,
+      "growthRatio": 3,
+      "thumbnail": "https://i.ytimg.com/vi/8IO0hxr9CIQ/hqdefault.jpg"
+    },
+    {
+      "id": "nhv6QfqBFac",
+      "title": "Ferins帰還！新要素大ニュース全部まとめてみた！#shorts #フォートナイト #ゆっくり実況 #fortnite",
+      "channelTitle": "すらぁ【ゆっくり実況】",
+      "channelId": "UCo1_0_CkxNJAaWwjVuIMpmg",
+      "genre": "game",
+      "publishedAt": "2026-06-21T00:10:30Z",
+      "viewCount": 67452,
+      "subscriberCount": 59000,
+      "growthRatio": 1,
+      "thumbnail": "https://i.ytimg.com/vi/nhv6QfqBFac/hqdefault.jpg"
+    },
+    {
+      "id": "77FvelWAO4Y",
+      "title": "フルーツ大福🍓レシピはコメント欄へ #美肌レシピ #簡単レシピ #shorts",
+      "channelTitle": "うか⌇27歳ズボラOLの美肌レシピ",
+      "channelId": "UCMmochijdwNlgP_fTNaoBdA",
+      "genre": "cooking",
+      "publishedAt": "2026-06-21T09:45:23Z",
+      "viewCount": 8399,
+      "subscriberCount": 13400,
+      "growthRatio": 1,
+      "thumbnail": "https://i.ytimg.com/vi/77FvelWAO4Y/hqdefault.jpg"
+    },
+    {
+      "id": "RxMI-qcaD5E",
+      "title": "#shorts # #料理 #美味しい #簡単レシピ #お好み焼き #夜食",
+      "channelTitle": "from50 〜50歳からの挑戦〜",
+      "channelId": "UCkeHvL1FbyMRf7Sr9cfZcmg",
+      "genre": "cooking",
+      "publishedAt": "2026-06-20T21:00:10Z",
+      "viewCount": 1770,
+      "subscriberCount": 1700,
+      "growthRatio": 1,
+      "thumbnail": "https://i.ytimg.com/vi/RxMI-qcaD5E/hqdefault.jpg"
+    },
+    {
+      "id": "PgIm2WbokNQ",
+      "title": "【想定外】猫が退いたトランクに『まさかの先客』が強行突破…😂 #shorts #猫と犬 #かわいい #パピヨン #キジ猫むーちゃん",
+      "channelTitle": "flower to 29",
+      "channelId": "UCjpOi1i1J4by8kOWSZPejnw",
+      "genre": "pets",
+      "publishedAt": "2026-06-21T10:58:51Z",
+      "viewCount": 1279,
+      "subscriberCount": 2320,
+      "growthRatio": 1,
+      "thumbnail": "https://i.ytimg.com/vi/PgIm2WbokNQ/hqdefault.jpg"
+    },
+    {
+      "id": "m8HXlzijLqI",
+      "title": "【#あるある 】同棲を好きになっちゃったときって不安になったりするのかな　#マイクラ #shorts",
+      "channelTitle": "ゆーり",
+      "channelId": "UCUBbzsQmWq64kSKkdWzHyPw",
+      "genre": "comedy",
+      "publishedAt": "2026-06-21T08:15:00Z",
+      "viewCount": 28446,
+      "subscriberCount": 53000,
+      "growthRatio": 1,
+      "thumbnail": "https://i.ytimg.com/vi/m8HXlzijLqI/hqdefault.jpg"
+    },
+    {
+      "id": "kpKACbjDW4w",
+      "title": "【ショートコント】ロッカールーム#あるある #お笑い #コント#shorts",
+      "channelTitle": "ミラクルST計画",
+      "channelId": "UCo7iaHAXV0WAUXO9Q67XE6Q",
+      "genre": "comedy",
+      "publishedAt": "2026-06-21T12:00:37Z",
+      "viewCount": 136013,
       "subscriberCount": 196000,
       "growthRatio": 1,
-      "thumbnail": "https://i.ytimg.com/vi/8IO0hxr9CIQ/hqdefault.jpg"
+      "thumbnail": "https://i.ytimg.com/vi/kpKACbjDW4w/hqdefault.jpg"
+    },
+    {
+      "id": "gBSOiKK_ce8",
+      "title": "常連のおばさん「いつもと違ってかっこいいね」#shorts",
+      "channelTitle": "ねをそchannel",
+      "channelId": "UCjxkpVFx27TztmfsmdTJdgg",
+      "genre": "game",
+      "publishedAt": "2026-06-21T07:00:21Z",
+      "viewCount": 41837,
+      "subscriberCount": 158000,
+      "growthRatio": 0,
+      "thumbnail": "https://i.ytimg.com/vi/gBSOiKK_ce8/hqdefault.jpg"
     },
     {
       "id": "KLLEzio_E4Y",
@@ -92,22 +140,22 @@
       "channelId": "UC0K6OJVlU1y5h75YmjH8HJw",
       "genre": "cooking",
       "publishedAt": "2026-06-20T14:54:24Z",
-      "viewCount": 18752,
+      "viewCount": 19756,
       "subscriberCount": 67300,
       "growthRatio": 0,
       "thumbnail": "https://i.ytimg.com/vi/KLLEzio_E4Y/hqdefault.jpg"
     },
     {
-      "id": "c7v8aaSx1RQ",
-      "title": "豆腐感ゼロ！ひき肉いらずの豆腐レシピ #簡単レシピ #豆腐レシピ #shorts",
-      "channelTitle": "M`sDINER ",
-      "channelId": "UChYsjvaMNKrNsUri5r71lWw",
+      "id": "qkzk6UgK6vQ",
+      "title": "1食130円かに玉弁当！レシピは概要欄#shorts#簡単レシピ #節約レシピ",
+      "channelTitle": "ゆみ⌇年150万貯める独身女の冷凍ｽﾄｯｸ",
+      "channelId": "UCI_dCc54GOR-wOrnXvKli1A",
       "genre": "cooking",
-      "publishedAt": "2026-06-20T12:00:27Z",
-      "viewCount": 2210,
-      "subscriberCount": 5670,
+      "publishedAt": "2026-06-21T11:24:52Z",
+      "viewCount": 7481,
+      "subscriberCount": 112000,
       "growthRatio": 0,
-      "thumbnail": "https://i.ytimg.com/vi/c7v8aaSx1RQ/hqdefault.jpg"
+      "thumbnail": "https://i.ytimg.com/vi/qkzk6UgK6vQ/hqdefault.jpg"
     },
     {
       "id": "EacJVnnlF9k",
@@ -116,22 +164,10 @@
       "channelId": "UChTgc3WgudB1GdQTdFH9fzg",
       "genre": "cooking",
       "publishedAt": "2026-06-21T08:00:18Z",
-      "viewCount": 1670,
+      "viewCount": 3225,
       "subscriberCount": 335000,
       "growthRatio": 0,
       "thumbnail": "https://i.ytimg.com/vi/EacJVnnlF9k/hqdefault.jpg"
-    },
-    {
-      "id": "isL088NZxRA",
-      "title": "机の上にあるビールが気になる犬#shorts",
-      "channelTitle": "癒しの動物チャンネル",
-      "channelId": "UCbTkGiaTs_bmmPaM3TRFSmg",
-      "genre": "pets",
-      "publishedAt": "2026-06-20T13:44:21Z",
-      "viewCount": 1987,
-      "subscriberCount": 12300,
-      "growthRatio": 0,
-      "thumbnail": "https://i.ytimg.com/vi/isL088NZxRA/hqdefault.jpg"
     },
     {
       "id": "VvdPur51rYs",
@@ -140,34 +176,46 @@
       "channelId": "UCDrLRJgdu05HtV8JLQVhx3w",
       "genre": "pets",
       "publishedAt": "2026-06-21T10:00:12Z",
-      "viewCount": 3223,
+      "viewCount": 9801,
       "subscriberCount": 620000,
       "growthRatio": 0,
       "thumbnail": "https://i.ytimg.com/vi/VvdPur51rYs/hqdefault.jpg"
     },
     {
-      "id": "F575T7pqqEk",
-      "title": "双子の茶白猫♂の後ろに回って匂いを嗅ぐ白茶猫♀ #Shorts",
-      "channelTitle": "亀犬猫チャンネル",
-      "channelId": "UCNsL7Tj8aG7u0zR6K4uooUw",
+      "id": "jt_g2-aqFvE",
+      "title": "みんながこの子を犬だと言うけど猫だねbyももたろう日記🍑#猫 #cat #shorts",
+      "channelTitle": "ももたろう日記。",
+      "channelId": "UCo1j-X7z0yBKZMQ670UmcIQ",
       "genre": "pets",
-      "publishedAt": "2026-06-20T14:10:53Z",
-      "viewCount": 1418,
-      "subscriberCount": 5130,
+      "publishedAt": "2026-06-21T11:00:18Z",
+      "viewCount": 1247,
+      "subscriberCount": 8980,
       "growthRatio": 0,
-      "thumbnail": "https://i.ytimg.com/vi/F575T7pqqEk/hqdefault.jpg"
+      "thumbnail": "https://i.ytimg.com/vi/jt_g2-aqFvE/hqdefault.jpg"
     },
     {
-      "id": "lhuTxT8Xoqs",
-      "title": "凍らせて使う美容液⁉️メイク前に使えば最強じゃん #美容 #コスメレビュー #コスメレポ #プチプラコスメ #新作コスメ #スキンケア #新感覚 #shorts",
-      "channelTitle": "めるも【ステマしません⚠️】",
-      "channelId": "UCqKxCTSCBhOl8FvkAvua6Qw",
-      "genre": "beauty",
-      "publishedAt": "2026-06-20T12:00:27Z",
-      "viewCount": 24277,
-      "subscriberCount": 57800,
+      "id": "Y82Ho-Yyslk",
+      "title": "おつりドロボーウザい時… #あるある #カップル #shorts",
+      "channelTitle": "サンキューどっこいしょ",
+      "channelId": "UCzKe7QNBR9Yrmy18CrvXh6g",
+      "genre": "comedy",
+      "publishedAt": "2026-06-21T09:00:20Z",
+      "viewCount": 286370,
+      "subscriberCount": 732000,
       "growthRatio": 0,
-      "thumbnail": "https://i.ytimg.com/vi/lhuTxT8Xoqs/hqdefault.jpg"
+      "thumbnail": "https://i.ytimg.com/vi/Y82Ho-Yyslk/hqdefault.jpg"
+    },
+    {
+      "id": "pHsP-2_-4Lc",
+      "title": "桃瀬ともが推す時短美容【DAZZY CLINIC 札幌院】 #shorts",
+      "channelTitle": "桃瀬とも",
+      "channelId": "UCqfoj0DID--y9jTV6C20Lxw",
+      "genre": "beauty",
+      "publishedAt": "2026-06-21T12:00:35Z",
+      "viewCount": 2061,
+      "subscriberCount": 8050,
+      "growthRatio": 0,
+      "thumbnail": "https://i.ytimg.com/vi/pHsP-2_-4Lc/hqdefault.jpg"
     }
   ]
 }
