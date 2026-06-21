@@ -1,0 +1,126 @@
+{
+  "generatedAt": "2026-06-15T06:00:00Z",
+  "note": "これはUI確認用のサンプルデータです。実際の運用では fetch-shorts.mjs が data/shorts.json をこの形式で自動生成します。",
+  "videos": [
+    {
+      "id": "dQw4w9WgXcQ",
+      "title": "電車で爆笑した瞬間がカメラに残ってた",
+      "channelTitle": "日常コメディch",
+      "channelId": "UC0000000001",
+      "genre": "comedy",
+      "publishedAt": "2026-06-15T01:00:00Z",
+      "viewCount": 480000,
+      "subscriberCount": 3200,
+      "growthRatio": 150,
+      "thumbnail": "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+    },
+    {
+      "id": "RgKAFK5djSk",
+      "title": "縦シューティングで初の世界record出した",
+      "channelTitle": "弾幕職人",
+      "channelId": "UC0000000002",
+      "genre": "game",
+      "publishedAt": "2026-06-15T02:00:00Z",
+      "viewCount": 88000,
+      "subscriberCount": 980,
+      "growthRatio": 90,
+      "thumbnail": "https://i.ytimg.com/vi/RgKAFK5djSk/hqdefault.jpg"
+    },
+    {
+      "id": "9bZkp7q19f0",
+      "title": "初心者なのにラスボスを1分で倒した",
+      "channelTitle": "ゲーム実況ぴよ",
+      "channelId": "UC0000000003",
+      "genre": "game",
+      "publishedAt": "2026-06-14T22:00:00Z",
+      "viewCount": 620000,
+      "subscriberCount": 12000,
+      "growthRatio": 52,
+      "thumbnail": "https://i.ytimg.com/vi/9bZkp7q19f0/hqdefault.jpg"
+    },
+    {
+      "id": "fJ9rUzIMcZQ",
+      "title": "弾いてみたら指がもう限界",
+      "channelTitle": "ギター部屋",
+      "channelId": "UC0000000004",
+      "genre": "music",
+      "publishedAt": "2026-06-14T12:00:00Z",
+      "viewCount": 95000,
+      "subscriberCount": 2100,
+      "growthRatio": 45,
+      "thumbnail": "https://i.ytimg.com/vi/fJ9rUzIMcZQ/hqdefault.jpg"
+    },
+    {
+      "id": "JGwWNGJdvx8",
+      "title": "保護犬が初めて笑った日",
+      "channelTitle": "ワンちゃん日記",
+      "channelId": "UC0000000005",
+      "genre": "pets",
+      "publishedAt": "2026-06-15T03:00:00Z",
+      "viewCount": 310000,
+      "subscriberCount": 8000,
+      "growthRatio": 39,
+      "thumbnail": "https://i.ytimg.com/vi/JGwWNGJdvx8/hqdefault.jpg"
+    },
+    {
+      "id": "OPf0YbXqDm0",
+      "title": "リフティング1000回できるまで終われません",
+      "channelTitle": "サッカー部の挑戦",
+      "channelId": "UC0000000006",
+      "genre": "sports",
+      "publishedAt": "2026-06-15T00:00:00Z",
+      "viewCount": 210000,
+      "subscriberCount": 5400,
+      "growthRatio": 39,
+      "thumbnail": "https://i.ytimg.com/vi/OPf0YbXqDm0/hqdefault.jpg"
+    },
+    {
+      "id": "kJQP7kiw5Fk",
+      "title": "材料2つだけで作る最強パスタ",
+      "channelTitle": "おうちごはん研究所",
+      "channelId": "UC0000000007",
+      "genre": "cooking",
+      "publishedAt": "2026-06-14T18:00:00Z",
+      "viewCount": 980000,
+      "subscriberCount": 45000,
+      "growthRatio": 22,
+      "thumbnail": "https://i.ytimg.com/vi/kJQP7kiw5Fk/hqdefault.jpg"
+    },
+    {
+      "id": "CevxZvSJLk8",
+      "title": "深夜に語る、ちょっと怖い話",
+      "channelTitle": "夜ふかしラジオ",
+      "channelId": "UC0000000008",
+      "genre": "talk",
+      "publishedAt": "2026-06-14T16:00:00Z",
+      "viewCount": 260000,
+      "subscriberCount": 15000,
+      "growthRatio": 17,
+      "thumbnail": "https://i.ytimg.com/vi/CevxZvSJLk8/hqdefault.jpg"
+    },
+    {
+      "id": "YQHsXMglC9A",
+      "title": "コンビニ食材だけで激うまアレンジ",
+      "channelTitle": "ひとり暮らしごはん",
+      "channelId": "UC0000000009",
+      "genre": "cooking",
+      "publishedAt": "2026-06-14T10:00:00Z",
+      "viewCount": 195000,
+      "subscriberCount": 22000,
+      "growthRatio": 9,
+      "thumbnail": "https://i.ytimg.com/vi/YQHsXMglC9A/hqdefault.jpg"
+    },
+    {
+      "id": "e-ORhEE9VVg",
+      "title": "100均だけでフルメイクしてみた結果",
+      "channelTitle": "プチプラ美容",
+      "channelId": "UC0000000010",
+      "genre": "beauty",
+      "publishedAt": "2026-06-14T20:00:00Z",
+      "viewCount": 540000,
+      "subscriberCount": 67000,
+      "growthRatio": 8,
+      "thumbnail": "https://i.ytimg.com/vi/e-ORhEE9VVg/hqdefault.jpg"
+    }
+  ]
+}
