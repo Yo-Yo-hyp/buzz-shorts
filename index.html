@@ -6,6 +6,7 @@
 <title>BUZZ SHORTS — 今、跳ねているYouTube Shortsだけを観測する</title>
 <meta name="description" content="登録者数に対して再生数が異常に伸びているYouTube Shortsだけを毎日自動収集。ゲーム・料理・ペット・コメディなどジャンル別に「今バズっている動画」を縦スクロールで発見できる観測サイト。">
 <meta name="robots" content="index, follow">
+<meta name="google-site-verification" content="Uh-hx6nohEWr4gfMsNeLHEu0ldTTWLfILJWZONYyJ08" />
 <link rel="canonical" href="https://yo-yo-hyp.github.io/buzz-shorts/">
 
 <!-- OGP (Facebook/LINEなど) -->
@@ -1343,7 +1344,7 @@
     });
 
     GENRES.forEach(g => {
-      const present = g.id === 'all' || allVideos.some(v => v.genre === g.id);
+      const present = g.id === 'all' || allVideos.some(v => v.genre === g.id && (v.sourceLang || 'ja') === LANG);
       if(!present) return;
       const btn = document.createElement('button');
       btn.className = 'genre-tab' + (g.id === currentGenre ? ' active' : '');
@@ -1476,7 +1477,9 @@
 
     // predictionOnly: 答え合わせ待ちのために裏で保持しているだけの動画。
     // 表示枠から間引かれた動画なので、通常のフィードには出さない。
-    const displayableVideos = allVideos.filter(v => !v.predictionOnly);
+    // sourceLang: 動画のタイトル言語。EN/JP切り替えタブに合わせて出す動画も切り替える
+    //（sourceLangが無い古いデータはJP扱いにする）。
+    const displayableVideos = allVideos.filter(v => !v.predictionOnly && (v.sourceLang || 'ja') === LANG);
 
     if(currentGenre === 'clips'){
       list = clips.slice(); // 保存した順（新しい順）のまま
@@ -1733,6 +1736,12 @@
   langBtn.addEventListener('click', () => {
     LANG = LANG === 'ja' ? 'en' : 'ja';
     localStorage.setItem('buzzshorts_lang', LANG);
+    // 切り替え後に今のジャンルタブがEN/JPどちらにも存在しない場合は「すべて」に戻す
+    const specialTabs = ['all', 'myfeed', 'clips', 'predict'];
+    if(!specialTabs.includes(currentGenre)){
+      const stillPresent = allVideos.some(v => v.genre === currentGenre && (v.sourceLang || 'ja') === LANG);
+      if(!stillPresent) currentGenre = 'all';
+    }
     applyLangUI();
     renderTabs();
     renderFeed();

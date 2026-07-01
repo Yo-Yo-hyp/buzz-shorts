@@ -226,8 +226,9 @@ async function main() {
   console.log(`対象期間: ${publishedAfter} 以降に投稿された動画`);
 
   // 1) ジャンル×地域バリアントごとに search.list でShorts候補を取得
-  // videoId -> genre のマップ（同じ動画がJP/US両方の検索にヒットしても最初の1回だけ採用）
+  // videoId -> genre / lang のマップ（同じ動画がJP/US両方の検索にヒットしても最初の1回だけ採用）
   const videoGenreMap = new Map();
+  const videoLangMap = new Map(); // videoId -> 'ja' | 'en'（EN/JPタブでの絞り込みに使う）
 
   for (const genre of GENRES) {
     for (const variant of genre.variants) {
@@ -258,7 +259,9 @@ async function main() {
           // タイトル/説明文にジャンルキーワードが含まれているかチェック
           if (!matchesKeywords(variant.matchKeywords, title, description)) continue;
 
+
           videoGenreMap.set(id, genre.id);
+          videoLangMap.set(id, variant.lang);
           matched++;
         }
         console.log(`[${genre.id}/${variant.region}] ${data.items?.length || 0} 件取得 → ジャンル一致 ${matched} 件`);
@@ -281,6 +284,7 @@ async function main() {
     const ageHours = (now - firstSeenMs) / 3600000;
     if (ageHours > PREDICT_PENDING_MAX_HOURS) continue; // 粘りすぎない
     videoGenreMap.set(id, prev.genre);
+    videoLangMap.set(id, prev.sourceLang || 'ja');
     pendingCarried++;
   }
   if (pendingCarried > 0) {
@@ -368,6 +372,7 @@ async function main() {
         channelTitle: v.snippet.channelTitle,
         channelId: v.snippet.channelId,
         genre: videoGenreMap.get(v.id) || 'other',
+        sourceLang: videoLangMap.get(v.id) || prev?.sourceLang || 'ja',
         publishedAt: v.snippet.publishedAt,
         viewCount,
         subscriberCount,
