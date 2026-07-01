@@ -2,6 +2,7 @@ name: Update Shorts Data
 
 # 1日4回（6時間ごと）データを更新する
 # YouTube Data APIの無料枠（1日10,000ユニット）に収まる範囲
+# ジャンル×地域(JP/US)で計18クエリ ≒ 1,800ユニット/回 × 4回/日 ≒ 7,200ユニット/日
 on:
   schedule:
     - cron: '0 */6 * * *'
@@ -24,7 +25,7 @@ jobs:
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           LOOKBACK_HOURS: '24'
-          MAX_PER_GENRE: '15'
+          MAX_PER_GENRE: '20'
           MIN_SUBSCRIBERS: '1000'
           MIN_VIEW_COUNT: '1000'
         run: node fetch-shorts.mjs

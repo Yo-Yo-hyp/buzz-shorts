@@ -20,9 +20,10 @@
  *                          再生数が極端に少ない動画は急上昇率が偶然高くなりやすいため除外する
  *
  * クォータの目安:
- *   search.list は1回100ユニット消費。ジャンル×検索語の数だけ
- *   呼び出すので、本設定（10ジャンル×1検索語）だと約1,000ユニット/回。
- *   1日10,000ユニットの無料枠内なら、1日数回の実行が可能。
+ *   search.list は1回100ユニット消費。ジャンル×地域(言語)の組み合わせの数だけ
+ *   呼び出す。本設定（11ジャンル・計18クエリ＝JP圏11 + 海外(英語)圏7）だと
+ *   約1,800ユニット/回。1日4回実行（6時間おき）でも1日7,200ユニット程度で、
+ *   無料枠(1日10,000ユニット)に収まる。
  * ------------------------------------------------------------
  */
 
@@ -36,51 +37,112 @@ if (!API_KEY) {
 }
 
 const LOOKBACK_HOURS = Number(process.env.LOOKBACK_HOURS || 24);
-const MAX_PER_GENRE = Number(process.env.MAX_PER_GENRE || 15);
+const MAX_PER_GENRE = Number(process.env.MAX_PER_GENRE || 20);
 const MIN_SUBSCRIBERS = Number(process.env.MIN_SUBSCRIBERS || 1000);
 const MIN_VIEW_COUNT = Number(process.env.MIN_VIEW_COUNT || 1000);
-const REGION_CODE = 'JP';
 const OUTPUT_PATH = path.resolve(process.cwd(), 'data', 'shorts.json');
 
-// ジャンルごとの検索キーワードと、タイトル/説明文に含まれているべき
-// チェック用キーワード（誤分類を防ぐための二重チェック）。
-// matchKeywords のうち1つでもタイトル or 説明文に含まれていればそのジャンルと判定する。
+// ジャンルごとに「地域(言語)バリアント」を複数持てるようにした。
+// 日本語圏(JP)と英語圏(US)、両方で検索することで海外の動画も拾えるようにする。
+// requireJapanese: true の場合、タイトルに日本語が含まれない動画は除外する
+//   （日本語検索なのに海外勢の無関係な動画が紛れ込むのを防ぐため）。
+// matchKeywords のうち1つでもタイトル/説明文に含まれていればそのジャンルと判定する
+//（検索結果には関連度の低い動画も混じるため、ここで二重チェックする）。
 const GENRES = [
   {
-    id: 'game', query: 'ゲーム実況 #shorts',
-    matchKeywords: ['ゲーム', 'プレイ', '実況', 'クリア', 'ボス', 'RTA', 'eスポーツ'],
+    id: 'game',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: 'ゲーム実況 #shorts',
+        matchKeywords: ['ゲーム', 'プレイ', '実況', 'クリア', 'ボス', 'RTA', 'eスポーツ'] },
+      { region: 'US', lang: 'en', requireJapanese: false, query: 'gaming shorts',
+        matchKeywords: ['game', 'gaming', 'gameplay', 'boss', 'glitch', 'speedrun', 'clutch', 'win', 'fail'] },
+    ],
   },
   {
-    id: 'cooking', query: '簡単レシピ #shorts',
-    matchKeywords: ['レシピ', '料理', '作り方', 'クッキング', 'ごはん', '飯', '食材', 'おかず'],
+    id: 'cooking',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: '簡単レシピ #shorts',
+        matchKeywords: ['レシピ', '料理', '作り方', 'クッキング', 'ごはん', '飯', '食材', 'おかず'] },
+    ],
   },
   {
-    id: 'pets', query: '犬 猫 #shorts',
-    matchKeywords: ['犬', '猫', 'ねこ', 'いぬ', 'ペット', '動物', 'わんこ', 'にゃんこ'],
+    id: 'pets',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: '犬 猫 動物 #shorts',
+        matchKeywords: ['犬', '猫', 'ねこ', 'いぬ', 'ペット', '動物', 'わんこ', 'にゃんこ', '鳥', 'うさぎ'] },
+      { region: 'US', lang: 'en', requireJapanese: false, query: 'animals pets shorts',
+        matchKeywords: ['dog', 'cat', 'pet', 'animal', 'puppy', 'kitten', 'wildlife', 'cute'] },
+    ],
   },
   {
-    id: 'comedy', query: 'あるある #shorts',
-    matchKeywords: ['あるある', '笑', 'コント', 'ネタ', 'ボケ', 'ツッコミ', 'お笑い'],
+    id: 'comedy',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: 'あるある #shorts',
+        matchKeywords: ['あるある', '笑', 'コント', 'ネタ', 'ボケ', 'ツッコミ', 'お笑い'] },
+      { region: 'US', lang: 'en', requireJapanese: false, query: 'funny comedy shorts',
+        matchKeywords: ['funny', 'comedy', 'prank', 'joke', 'fail', 'skit', 'hilarious'] },
+    ],
   },
   {
-    id: 'beauty', query: 'メイク 美容 #shorts',
-    matchKeywords: ['メイク', '美容', 'コスメ', 'スキンケア', 'ヘアアレンジ', '化粧'],
+    id: 'beauty',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: 'メイク 美容 #shorts',
+        matchKeywords: ['メイク', '美容', 'コスメ', 'スキンケア', 'ヘアアレンジ', '化粧'] },
+    ],
   },
   {
-    id: 'music', query: '弾いてみた 歌ってみた #shorts',
-    matchKeywords: ['弾いてみた', '歌ってみた', 'カバー', 'ギター', 'ピアノ', '演奏', '作曲', 'Cover'],
+    id: 'music',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: '弾いてみた 歌ってみた #shorts',
+        matchKeywords: ['弾いてみた', '歌ってみた', 'カバー', 'ギター', 'ピアノ', '演奏', '作曲', 'Cover'] },
+    ],
   },
   {
-    id: 'sports', query: 'スポーツ 筋トレ #shorts',
-    matchKeywords: ['サッカー', '野球', 'バスケ', 'スポーツ', '筋トレ', 'トレーニング', 'リフティング'],
+    id: 'sports',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: 'スポーツ 筋トレ #shorts',
+        matchKeywords: ['サッカー', '野球', 'バスケ', 'スポーツ', '筋トレ', 'トレーニング', 'リフティング'] },
+      { region: 'US', lang: 'en', requireJapanese: false, query: 'sports highlights shorts',
+        matchKeywords: ['sports', 'soccer', 'football', 'basketball', 'workout', 'gym', 'training', 'highlight'] },
+    ],
   },
   {
-    id: 'talk', query: '雑談 あるある話 #shorts',
-    matchKeywords: ['雑談', '話', 'トーク', '相談', 'エピソード'],
+    id: 'talk',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: '雑談 あるある話 #shorts',
+        matchKeywords: ['雑談', '話', 'トーク', '相談', 'エピソード'] },
+    ],
+  },
+  {
+    id: 'trivia',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: '雑学 豆知識 #shorts',
+        matchKeywords: ['雑学', '豆知識', 'トリビア', '知識', 'なぜ', '意外'] },
+      { region: 'US', lang: 'en', requireJapanese: false, query: 'facts trivia shorts',
+        matchKeywords: ['fact', 'facts', 'trivia', 'did you know', 'random fact', 'science'] },
+    ],
+  },
+  {
+    id: 'asmr',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: false, query: 'ASMR #shorts',
+        matchKeywords: ['ASMR', '咀嚼音', '耳かき', '癒し', '睡眠'] },
+      { region: 'US', lang: 'en', requireJapanese: false, query: 'ASMR satisfying shorts',
+        matchKeywords: ['asmr', 'satisfying', 'relax', 'tingles', 'sound'] },
+    ],
+  },
+  {
+    id: 'diy',
+    variants: [
+      { region: 'JP', lang: 'ja', requireJapanese: true, query: 'ライフハック 便利グッズ #shorts',
+        matchKeywords: ['ライフハック', '便利グッズ', '裏技', 'DIY', '収納', '時短'] },
+      { region: 'US', lang: 'en', requireJapanese: false, query: 'DIY life hack shorts',
+        matchKeywords: ['diy', 'life hack', 'hack', 'trick', 'tips', 'build'] },
+    ],
   },
 ];
 
-const SEARCH_RESULTS_PER_GENRE = 25;
+const SEARCH_RESULTS_PER_GENRE = 30;
 
 // ---------------------------------------------------------------
 // 予想ゲーム関連設定
@@ -117,11 +179,11 @@ function containsJapanese(text){
   return /[\u3040-\u30FF\u4E00-\u9FFF]/.test(text || '');
 }
 
-// タイトル・説明文にジャンルのキーワードが実際に含まれているか確認する。
+// タイトル・説明文にキーワードが実際に含まれているか確認する（大文字小文字を無視）。
 // 検索結果には関連度の低い動画も混じるため、ここで二重チェックする。
-function matchesGenre(genre, title, description){
-  const text = `${title} ${description}`;
-  return genre.matchKeywords.some(kw => text.includes(kw));
+function matchesKeywords(keywords, title, description){
+  const text = `${title} ${description}`.toLowerCase();
+  return keywords.some(kw => text.includes(kw.toLowerCase()));
 }
 
 // ---------------------------------------------------------------
@@ -163,45 +225,46 @@ async function main() {
   const publishedAfter = new Date(Date.now() - LOOKBACK_HOURS * 3600 * 1000).toISOString();
   console.log(`対象期間: ${publishedAfter} 以降に投稿された動画`);
 
-  // 1) ジャンルごとに search.list でShorts候補を取得
-  // videoId -> genre のマップ（同じ動画が複数ジャンルにマッチしたら最初のジャンルを優先）
+  // 1) ジャンル×地域バリアントごとに search.list でShorts候補を取得
+  // videoId -> genre のマップ（同じ動画がJP/US両方の検索にヒットしても最初の1回だけ採用）
   const videoGenreMap = new Map();
 
   for (const genre of GENRES) {
-    try {
-      const data = await callApi('search', {
-        part: 'snippet',
-        type: 'video',
-        q: genre.query,
-        order: 'viewCount',
-        videoDuration: 'short', // 4分未満（後でShorts判定をさらに絞る）
-        publishedAfter,
-        regionCode: REGION_CODE,
-        relevanceLanguage: 'ja',
-        maxResults: SEARCH_RESULTS_PER_GENRE,
-        safeSearch: 'moderate',
-      });
+    for (const variant of genre.variants) {
+      try {
+        const data = await callApi('search', {
+          part: 'snippet',
+          type: 'video',
+          q: variant.query,
+          order: 'viewCount',
+          videoDuration: 'short', // 4分未満（後でShorts判定をさらに絞る）
+          publishedAfter,
+          regionCode: variant.region,
+          relevanceLanguage: variant.lang,
+          maxResults: SEARCH_RESULTS_PER_GENRE,
+          safeSearch: 'moderate',
+        });
 
-      let matched = 0;
-      for (const item of data.items || []) {
-        const id = item.id?.videoId;
-        const title = item.snippet?.title || '';
-        const description = item.snippet?.description || '';
-        if (!id || videoGenreMap.has(id)) continue;
+        let matched = 0;
+        for (const item of data.items || []) {
+          const id = item.id?.videoId;
+          const title = item.snippet?.title || '';
+          const description = item.snippet?.description || '';
+          if (!id || videoGenreMap.has(id)) continue;
 
-        // 日本語が含まれていない動画（海外勢など）はここで除外
-        if (!containsJapanese(title)) continue;
+          // JP圏の検索なのに日本語タイトルでない動画（無関係な海外勢など）はここで除外
+          if (variant.requireJapanese && !containsJapanese(title)) continue;
 
-        // タイトル/説明文にジャンルキーワードが含まれているかチェック
-        // （検索結果には関連度の低い動画も混じるため）
-        if (!matchesGenre(genre, title, description)) continue;
+          // タイトル/説明文にジャンルキーワードが含まれているかチェック
+          if (!matchesKeywords(variant.matchKeywords, title, description)) continue;
 
-        videoGenreMap.set(id, genre.id);
-        matched++;
+          videoGenreMap.set(id, genre.id);
+          matched++;
+        }
+        console.log(`[${genre.id}/${variant.region}] ${data.items?.length || 0} 件取得 → ジャンル一致 ${matched} 件`);
+      } catch (err) {
+        console.error(`[${genre.id}/${variant.region}] 検索に失敗: ${err.message}`);
       }
-      console.log(`[${genre.id}] ${data.items?.length || 0} 件取得 → ジャンル一致 ${matched} 件`);
-    } catch (err) {
-      console.error(`[${genre.id}] 検索に失敗: ${err.message}`);
     }
   }
 
