@@ -26,7 +26,7 @@
  * ------------------------------------------------------------
  */
 
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
@@ -81,6 +81,35 @@ const GENRES = [
 ];
 
 const SEARCH_RESULTS_PER_GENRE = 25;
+
+// ---------------------------------------------------------------
+// 予想ゲーム関連設定
+// ---------------------------------------------------------------
+// 動画が最初に観測されてから何時間後に「答え合わせ」するか
+const PREDICT_CHECK_HOURS = 6;
+// 答え合わせが済んでいない動画を、検索結果に出てこなくなっても
+// 何時間まで再取得して粘るか（この間に答え合わせが確定する）
+const PREDICT_PENDING_MAX_HOURS = 18;
+
+// 6時間後の伸び倍率(現在の再生数 ÷ 観測開始時点の再生数)から3段階を判定する
+function resolveTier(ratio) {
+  if (ratio >= 3) return 'blast';   // 爆伸び
+  if (ratio >= 1.2) return 'normal'; // 普通
+  return 'slow';                     // 伸び悩み
+}
+
+// 直前の実行結果(data/shorts.json)を読み込む。存在しない/壊れている場合は空扱い。
+async function readPreviousOutput() {
+  try {
+    const raw = await readFile(OUTPUT_PATH, 'utf-8');
+    const json = JSON.parse(raw);
+    const map = new Map();
+    for (const v of json.videos || []) map.set(v.id, v);
+    return map;
+  } catch {
+    return new Map();
+  }
+}
 
 // 日本語（ひらがな・カタカナ・漢字）の文字が含まれているかを判定する。
 // 海外勢の動画やローマ字のみのタイトルを弾くための簡易フィルタ。
@@ -176,6 +205,25 @@ async function main() {
     }
   }
 
+  // 1.5) 前回まで答え合わせが済んでいなかった動画を、検索結果から漏れていても
+  //      再取得の対象に加える（そうしないと答え合わせのタイミングを逃してしまう）
+  const prevMap = await readPreviousOutput();
+  const now = Date.now();
+  const nowISO = new Date(now).toISOString();
+  let pendingCarried = 0;
+  for (const [id, prev] of prevMap) {
+    if (videoGenreMap.has(id)) continue; // 今回の検索でも見つかった動画はそのまま
+    if (prev.resolvedAt) continue; // 答え合わせ済みならもう追いかけなくてよい
+    const firstSeenMs = new Date(prev.firstSeenAt || prev.publishedAt).getTime();
+    const ageHours = (now - firstSeenMs) / 3600000;
+    if (ageHours > PREDICT_PENDING_MAX_HOURS) continue; // 粘りすぎない
+    videoGenreMap.set(id, prev.genre);
+    pendingCarried++;
+  }
+  if (pendingCarried > 0) {
+    console.log(`答え合わせ待ちのため ${pendingCarried} 件を追加で再取得します。`);
+  }
+
   const videoIds = [...videoGenreMap.keys()];
   if (videoIds.length === 0) {
     console.warn('動画が1件も取得できませんでした。');
@@ -231,6 +279,26 @@ async function main() {
 
       const growthRatio = Math.round(viewCount / Math.max(subscriberCount, 1));
 
+      // ---- 予想ゲーム用フィールド ----
+      // firstSeenAt/firstSeenViewCount: この動画を最初に観測した時点の再生数（予想の基準点）
+      // resolvedTier/resolvedAt: 観測開始からPREDICT_CHECK_HOURS経過後に確定する答え
+      const prev = prevMap.get(v.id);
+      const firstSeenAt = prev?.firstSeenAt || nowISO;
+      const firstSeenViewCount = prev?.firstSeenViewCount ?? viewCount;
+      let resolvedTier = prev?.resolvedTier ?? null;
+      let resolvedAt = prev?.resolvedAt ?? null;
+      let sixHourGrowthRatio = prev?.sixHourGrowthRatio ?? null;
+
+      if (!resolvedAt) {
+        const ageHours = (now - new Date(firstSeenAt).getTime()) / 3600000;
+        if (ageHours >= PREDICT_CHECK_HOURS) {
+          const ratio = viewCount / Math.max(firstSeenViewCount, 1);
+          resolvedTier = resolveTier(ratio);
+          resolvedAt = nowISO;
+          sixHourGrowthRatio = Number(ratio.toFixed(2));
+        }
+      }
+
       return {
         id: v.id,
         title: v.snippet.title,
@@ -242,6 +310,12 @@ async function main() {
         subscriberCount,
         growthRatio,
         thumbnail: v.snippet.thumbnails?.high?.url || v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url,
+        firstSeenAt,
+        firstSeenViewCount,
+        predictCheckHours: PREDICT_CHECK_HOURS,
+        resolvedTier,
+        resolvedAt,
+        sixHourGrowthRatio,
       };
     })
     .filter(Boolean);
@@ -249,20 +323,32 @@ async function main() {
   console.log(`登録者数${MIN_SUBSCRIBERS}人以上・再生数${MIN_VIEW_COUNT}回以上でフィルタ後: ${videos.length} 件`);
 
   // 6) ジャンルごとに急上昇率が高い順に並べ、上位だけ残す
+  //    （表示用の間引き。答え合わせ待ちの動画は間引かれても answerPending として残す）
   const byGenre = new Map();
   for (const v of videos) {
     if (!byGenre.has(v.genre)) byGenre.set(v.genre, []);
     byGenre.get(v.genre).push(v);
   }
   let trimmed = [];
+  const trimmedIds = new Set();
   for (const list of byGenre.values()) {
     list.sort((a, b) => b.growthRatio - a.growthRatio);
-    trimmed.push(...list.slice(0, MAX_PER_GENRE));
+    const kept = list.slice(0, MAX_PER_GENRE);
+    kept.forEach(v => trimmedIds.add(v.id));
+    trimmed.push(...kept);
   }
-  trimmed.sort((a, b) => b.growthRatio - a.growthRatio);
 
-  console.log(`最終的に ${trimmed.length} 件を出力します。`);
-  await writeOutput(trimmed);
+  // 表示枠から漏れたが、まだ答え合わせが済んでいない動画はフィードには出さず
+  // 予想の答え合わせ専用データとして残す（predictionOnly: true）
+  const pendingOnly = videos
+    .filter(v => !trimmedIds.has(v.id) && !v.resolvedAt)
+    .map(v => ({ ...v, predictionOnly: true }));
+
+  const output = [...trimmed, ...pendingOnly];
+  output.sort((a, b) => b.growthRatio - a.growthRatio);
+
+  console.log(`最終的に ${trimmed.length} 件をフィードに、${pendingOnly.length} 件を答え合わせ待ちとして出力します。`);
+  await writeOutput(output);
 }
 
 async function writeOutput(videos) {
