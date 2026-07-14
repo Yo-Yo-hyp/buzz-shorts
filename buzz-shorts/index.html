@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>BUZZ SHORTS — 商用データ分析 × 予測ゲーム</title>
+<title>BUZZ SHORTS — 今、跳ねているYouTube Shortsだけを観測する</title>
 <meta name="description" content="登録者数に対して再生数が異常に伸びているYouTube Shortsだけを毎日自動収集。ゲーム・料理・ペット・コメディなどジャンル別に「今バズっている動画」を縦スクロールで発見できる観測サイト。">
 <meta name="robots" content="index, follow">
 <meta name="google-site-verification" content="Uh-hx6nohEWr4gfMsNeLHEu0ldTTWLfILJWZONYyJ08" />
@@ -189,11 +189,6 @@
     align-items:center;
     justify-content:center;
     position:relative;
-    animation:cardFadeIn .4s ease-out;
-  }
-  @keyframes cardFadeIn{
-    0%{opacity:0; transform:translateY(20px);}
-    100%{opacity:1; transform:translateY(0);}
   }
 
   .card-inner{
@@ -449,11 +444,6 @@
   .toast.show{
     opacity:1;
     transform:translateX(-50%) translateY(0);
-    animation:toastSlide .3s ease-out;
-  }
-  @keyframes toastSlide{
-    0%{transform:translateX(-50%) translateY(-12px); opacity:0;}
-    100%{transform:translateX(-50%) translateY(0); opacity:1;}
   }
 
   /* ===== Predict block (on video cards) ===== */
@@ -487,15 +477,8 @@
     cursor:pointer;
     text-align:center;
     line-height:1.3;
-    transition:all .15s;
   }
   .predict-tier-btn:active{transform:scale(0.96);}
-  .predict-tier-btn.active{
-    background:var(--spike);
-    border-color:var(--spike);
-    color:var(--bg);
-    box-shadow:0 4px 12px rgba(212,255,61,0.2);
-  }
   .predict-confidence-row{
     display:flex;
     gap:6px;
@@ -573,11 +556,6 @@
     border-radius:12px;
     padding:12px 8px;
     text-align:center;
-    transition:all .2s;
-  }
-  .predict-stat:hover{
-    border-color:rgba(212,255,61,0.3);
-    box-shadow:0 4px 12px rgba(212,255,61,0.06);
   }
   .predict-stat .num{
     font-family:var(--font-display);
@@ -603,12 +581,6 @@
     color:var(--spike);
     padding:4px 10px;
     border-radius:999px;
-    animation:badgePop .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  @keyframes badgePop{
-    0%{transform:scale(0.8); opacity:0;}
-    50%{transform:scale(1.1);}
-    100%{transform:scale(1); opacity:1;}
   }
   .predict-history-item{
     display:flex;
@@ -719,231 +691,6 @@
     color:var(--bg);
     font-weight:700;
   }
-
-  /* ===== Points & filters ===== */
-  .icon-btn.points{
-    color:var(--spike);
-    border-color:rgba(212,255,61,0.4);
-    font-weight:700;
-    min-width:52px;
-    justify-content:center;
-  }
-  .icon-btn.filter-on{
-    color:var(--hot);
-    border-color:rgba(255,92,61,0.5);
-    font-weight:700;
-  }
-  .icon-btn.research-on{
-    color:var(--spike);
-    border-color:rgba(212,255,61,0.5);
-    font-weight:700;
-  }
-
-  /* ===== GOLD MVP card ===== */
-  .card.mvp .card-inner{
-    box-shadow:0 0 0 2px #FFD700, 0 0 24px rgba(255,215,0,0.45), 0 30px 60px -20px rgba(0,0,0,0.6);
-  }
-  .card.mvp .card-inner::before{
-    content:'🏆 TODAY\'S BUZZ MVP';
-    position:absolute;top:max(88px,calc(env(safe-area-inset-top)+80px));left:14px;z-index:12;
-    font-family:var(--font-display);font-size:9px;letter-spacing:0.08em;
-    color:#FFD700;background:rgba(11,14,17,0.7);padding:4px 10px;border-radius:999px;
-    border:1px solid rgba(255,215,0,0.5);
-  }
-
-  /* ===== Analytics overlay ===== */
-  .analytics-panel{
-    margin-top:10px;
-    display:flex;flex-direction:column;gap:6px;
-  }
-  .spike-gauge{
-    height:8px;border-radius:4px;
-    background:linear-gradient(90deg,#1a3a1a 0%,var(--spike) 40%,var(--hot) 80%,#ff0040 100%);
-    position:relative;overflow:hidden;
-  }
-  .spike-gauge .needle{
-    position:absolute;top:-2px;bottom:-2px;width:3px;
-    background:#fff;box-shadow:0 0 8px var(--spike);
-    transform:translateX(-50%);transition:left .4s;
-  }
-  .gap-display{
-    font-family:var(--font-display);font-size:13px;font-weight:700;
-    color:var(--spike);letter-spacing:0.04em;
-  }
-  .velocity-meter{
-    font-size:11px;color:var(--hot);font-weight:700;
-  }
-  .buzz-kw{
-    display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;
-  }
-  .buzz-kw span{
-    font-size:10px;padding:2px 7px;border-radius:999px;
-    background:rgba(212,255,61,0.12);color:var(--spike);
-    border:1px solid rgba(212,255,61,0.3);
-  }
-  .analysis-tags{
-    display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;
-  }
-  .analysis-tag{
-    font-size:9.5px;padding:2px 7px;border-radius:4px;
-    background:rgba(255,92,61,0.12);color:var(--hot);
-    border:1px solid rgba(255,92,61,0.25);
-  }
-  /* ===== Bonus neon tags ===== */
-  .bonus-tags{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-  .bonus-tag{font-family:var(--font-display);font-size:10px;padding:4px 8px;border-radius:999px;border:1px solid rgba(255,255,255,0.06);color:var(--bg);font-weight:700}
-  .bonus-bighole{background:linear-gradient(90deg,var(--hot),#ff8a5f);box-shadow:0 6px 18px rgba(255,92,61,0.12);border-color:rgba(255,92,61,0.4);}
-  .bonus-time{background:linear-gradient(90deg,var(--spike),#b6ff88);box-shadow:0 6px 18px rgba(212,255,61,0.12);border-color:rgba(212,255,61,0.35);}
-  .bonus-genre{background:linear-gradient(90deg,var(--spike),var(--hot));box-shadow:0 6px 18px rgba(212,255,61,0.06);border-color:rgba(212,255,61,0.18);}
-  .engagement-grade{
-    font-family:var(--font-display);font-size:11px;
-    color:var(--spike);font-weight:700;
-  }
-
-  /* ===== Creator analysis btn ===== */
-  .creator-btn{
-    position:absolute;
-    top:max(142px,calc(env(safe-area-inset-top)+134px));
-    right:14px;z-index:10;
-    width:38px;height:38px;border-radius:50%;
-    background:rgba(11,14,17,0.55);
-    border:1px solid rgba(245,243,238,0.18);
-    color:var(--spike);
-    display:flex;align-items:center;justify-content:center;
-    cursor:pointer;text-decoration:none;font-size:16px;
-    backdrop-filter:blur(4px);
-  }
-
-  /* ===== Predict progress bar ===== */
-  .predict-progress{
-    height:4px;background:rgba(245,243,238,0.1);border-radius:2px;
-    margin:6px 0;overflow:hidden;position:relative;
-  }
-  .predict-progress .zone{
-    position:absolute;top:0;bottom:0;
-  }
-  .predict-progress .zone.slow{background:rgba(138,143,152,0.2);}
-  .predict-progress .zone.normal{background:rgba(212,255,61,0.15);}
-  .predict-progress .zone.blast{background:rgba(255,92,61,0.2);}
-  .predict-progress .marker{
-    position:absolute;top:-1px;width:4px;height:6px;
-    background:var(--spike);border-radius:1px;
-    transform:translateX(-50%);transition:left .5s;
-  }
-
-  /* ===== Hedge betting ===== */
-  .bet-amount-row{
-    display:flex;gap:5px;margin:6px 0;flex-wrap:wrap;
-  }
-  .bet-amount-btn{
-    font-family:var(--font-display);font-size:10px;
-    padding:4px 10px;border-radius:999px;
-    border:1px solid rgba(245,243,238,0.2);
-    background:transparent;color:var(--text-dim);cursor:pointer;
-    transition:all .15s;
-  }
-  .bet-amount-btn:hover{
-    border-color:rgba(245,243,238,0.4);
-  }
-  .bet-amount-btn.active{
-    background:var(--spike);color:var(--bg);border-color:var(--spike);font-weight:700;
-    box-shadow:0 2px 8px rgba(212,255,61,0.15);
-  }
-  .hedge-summary{
-    font-size:10px;color:var(--text-dim);margin-top:4px;
-    padding:6px 8px;background:rgba(11,14,17,0.4);
-    border-radius:8px;border:1px solid rgba(245,243,238,0.06);
-    transition:background .2s;
-  }
-
-  /* ===== Bankruptcy overlay ===== */
-  .bankruptcy-overlay{
-    position:fixed;inset:0;z-index:180;
-    background:rgba(11,14,17,0.85);backdrop-filter:blur(6px);
-    display:flex;align-items:center;justify-content:center;padding:24px;
-  }
-  .bankruptcy-overlay.hidden{display:none;}
-  .bankruptcy-box{
-    background:var(--surface);border:1px solid rgba(255,92,61,0.4);
-    border-radius:20px;padding:24px;max-width:340px;text-align:center;
-  }
-  .bankruptcy-box h3{
-    font-family:var(--font-display);color:var(--hot);font-size:14px;margin-bottom:10px;
-  }
-  .bankruptcy-box p{font-size:12.5px;color:var(--text-dim);line-height:1.7;margin-bottom:14px;}
-  .bankruptcy-progress{font-family:var(--font-display);font-size:20px;color:var(--spike);margin-bottom:14px;}
-  .bankruptcy-btn{
-    font-family:var(--font-display);font-size:12px;
-    padding:12px 24px;border-radius:12px;border:none;
-    background:var(--spike);color:var(--bg);font-weight:700;cursor:pointer;
-  }
-  .bankruptcy-btn:disabled{opacity:0.4;cursor:not-allowed;}
-
-  /* ===== Clip memo ===== */
-  .clip-memo{
-    width:100%;margin-top:8px;padding:8px 10px;
-    background:rgba(11,14,17,0.6);border:1px solid rgba(245,243,238,0.14);
-    border-radius:8px;color:var(--text);font-size:12px;
-    font-family:var(--font-body);resize:none;min-height:48px;
-  }
-  .clip-memo::placeholder{color:var(--text-dim);}
-
-  /* ===== Dashboard extras ===== */
-  .rank-badge{
-    display:inline-block;font-family:var(--font-display);
-    font-size:13px;color:var(--spike);font-weight:700;
-    background:rgba(212,255,61,0.1);border:1px solid rgba(212,255,61,0.3);
-    padding:6px 14px;border-radius:999px;margin-bottom:14px;
-  }
-  .radar-chart{width:200px;height:200px;margin:0 auto 18px;display:block;}
-  .heatmap{
-    display:grid;grid-template-columns:repeat(24,1fr);gap:1px;
-    margin-bottom:14px;
-  }
-  .heatmap-cell{
-    aspect-ratio:1;border-radius:1px;background:rgba(245,243,238,0.06);
-  }
-  .heatmap-labels{
-    display:flex;justify-content:space-between;
-    font-size:8px;color:var(--text-dim);margin-bottom:4px;
-  }
-  .dash-section{
-    margin-bottom:18px;padding:14px;
-    background:var(--surface);border:1px solid rgba(245,243,238,0.08);
-    border-radius:12px;
-  }
-  .dash-section h3{
-    font-family:var(--font-display);font-size:12px;
-    color:var(--spike);margin-bottom:8px;letter-spacing:0.04em;
-  }
-  .audio-trend-list{font-size:12px;color:var(--text-dim);line-height:1.8;}
-  .season-badge{
-    display:inline-flex;align-items:center;gap:4px;
-    font-size:11px;padding:4px 10px;border-radius:999px;
-    background:rgba(255,215,0,0.1);color:#FFD700;
-    border:1px solid rgba(255,215,0,0.3);margin:3px;
-  }
-  .theme-picker{display:flex;gap:8px;margin-bottom:18px;}
-  .theme-swatch{
-    width:36px;height:36px;border-radius:50%;cursor:pointer;
-    border:2px solid transparent;
-  }
-  .theme-swatch.active{border-color:var(--text);}
-  .export-btn{
-    font-family:var(--font-display);font-size:11px;
-    padding:10px 16px;border-radius:10px;
-    border:1px solid rgba(212,255,61,0.4);
-    background:transparent;color:var(--spike);cursor:pointer;
-    margin-bottom:14px;width:100%;
-    transition:all .2s, box-shadow .15s;
-  }
-  .export-btn:hover{
-    background:rgba(212,255,61,0.08);
-    box-shadow:0 4px 12px rgba(212,255,61,0.15);
-  }
-  .export-btn:active{
-    transform:scale(0.98);
-  }
 </style>
 </head>
 <body>
@@ -966,14 +713,12 @@
   <div class="topbar">
     <div class="topbar-row">
       <div class="logo"><span class="accent">⚡</span>BUZZ<span class="accent">SHORTS</span></div>
-      <button class="icon-btn points" id="pointsBadge" type="button">💰 100</button>
       <button class="icon-btn streak" id="streakBadge" type="button">🔥 0</button>
       <div class="topbar-spacer"></div>
-      <button class="icon-btn" id="undergroundBtn" type="button" title="アンダーグラウンド">💎</button>
       <button class="icon-btn" id="autoplayBtn" type="button">▶▶</button>
-      <button class="icon-btn" id="langBtn" type="button">EN</button>
       <button class="icon-btn" id="sortBtn" type="button">⚡</button>
       <button class="icon-btn" id="settingsBtn" type="button">⚙</button>
+      <button class="icon-btn" id="langToggle" type="button">EN</button>
     </div>
     <div class="topbar-row">
       <nav class="genre-tabs" id="genreTabs"></nav>
@@ -999,22 +744,11 @@
     <div class="modal">
       <h2 id="modalTitle">GENRE SETTINGS</h2>
       <p id="modalDesc"></p>
-      <h2 style="margin-top:12px;font-size:12px;">THEME</h2>
-      <div class="theme-picker" id="themePicker"></div>
       <div class="pill-grid" id="modalPills"></div>
       <div class="modal-actions">
         <button id="modalSkip"></button>
         <button class="primary" id="modalSave"></button>
       </div>
-    </div>
-  </div>
-
-  <div class="bankruptcy-overlay hidden" id="bankruptcyOverlay">
-    <div class="bankruptcy-box">
-      <h3>🆘 破産保護プログラム</h3>
-      <p id="bankruptcyDesc">ポイントが0になりました。未予測の動画を3本、各15秒以上視聴して救済資金30ptを獲得しよう。</p>
-      <div class="bankruptcy-progress" id="bankruptcyProgress">0 / 3 本完了</div>
-      <button class="bankruptcy-btn" id="bankruptcyClaim" type="button" disabled>救済資金 30pt を受け取る</button>
     </div>
   </div>
 
@@ -1053,41 +787,14 @@
     en: [[1,'Trainee Observer'],[3,'Observer'],[7,'Observer Lv.2'],[14,'Senior Observer'],[30,'Legendary Observer']],
   };
 
-  // ---- 予想ゲーム・ポイント関連 -----------------------------------
-  const INITIAL_POINTS = 100;
-  const DAILY_BONUS = 50;
-  const STREAK_BONUS = 100;
-  const BANKRUPTCY_RESCUE = 30;
-  const BANKRUPTCY_WATCH_SEC = 15;
-  const BANKRUPTCY_VIDEOS_NEEDED = 3;
-  const CONTRARIAN_BONUS = 25;
-  const BET_AMOUNTS = [5, 10, 20, 50];
-  const TIER_ODDS = { blast: 2.5, normal: 1.8, slow: 3.5 };
-  const TIER_BOUNDARIES = { slowMax: 1.2, blastMin: 3 };
-
-  const THEMES = {
-    acid:  { spike: '#D4FF3D', hot: '#FF5C3D', label: 'アシッドグリーン' },
-    pink:  { spike: '#FF2D95', hot: '#FF5C3D', label: 'サイバーピンク' },
-    blue:  { spike: '#00E5FF', hot: '#7B61FF', label: 'ネオンブルー' },
-  };
-
-  const RANK_DISTRIBUTION = [
-    [3000, 0.1], [1500, 0.5], [800, 1], [500, 3], [300, 8],
-    [200, 15], [150, 25], [100, 40], [50, 60], [0, 100],
-  ];
-
-  const SEASON_BADGES = [
-    [500, '🥉 ブロンズ観測員'], [1000, '🥈 シルバー観測員'],
-    [2000, '🥇 ゴールド観測員'], [5000, '💎 プラチナ観測員'],
-    [10000, '👑 殿堂入り観測員'],
-  ];
-
+  // ---- 予想ゲーム関連 -------------------------------------------
+  // 6時間後の伸び方の3段階
   const PREDICT_TIERS = [
     {id:'blast',  ja:'🔥爆伸び',   en:'🔥Blast',  short:{ja:'爆伸び', en:'Blast'}},
     {id:'normal', ja:'📈普通',     en:'📈Normal', short:{ja:'普通',   en:'Normal'}},
     {id:'slow',   ja:'😐伸び悩み', en:'😐Slow',   short:{ja:'伸び悩み', en:'Slow'}},
   ];
-  // 自信度は廃止しポイントベット方式に移行（後方互換のため残す）
+  // 自信度（当たったときのポイント倍率）
   const CONFIDENCE_LEVELS = [
     {id:'weak',   mult:0.5, ja:'弱気', en:'Cautious'},
     {id:'normal', mult:1,   ja:'普通', en:'Normal'},
@@ -1135,31 +842,8 @@
       predictStatStreak: '連続的中',
       predictStatBest: '最高記録',
       predictStatRate: '的中率',
-      predictStatPoints: 'ポイント',
-      predictRanking: (p) => `上位 ${p}% の観測員`,
-      predictHistoryEmpty: 'まだ予想してないよ。動画カードの下から「爆伸び／普通／伸び悩み」にポイントをベットしてみよう。',
+      predictHistoryEmpty: 'まだ予想してないよ。動画カードの下から「爆伸び／普通／伸び悩み」を選んで予想してみよう。',
       predictPending: '答え合わせ待ち',
-      dailyBonus: (n) => `🎁 デイリーボーナス +${n}pt！`,
-      betPlaced: (n, tier) => `${tier} に ${n}pt ベット完了`,
-      hedgeInfo: (total) => `合計ベット: ${total}pt`,
-      bankruptcyClaim: '🆘 救済資金 30pt を受け取った！',
-      seasonReset: (badge) => `📅 シーズンリセット！${badge ? `勲章「${badge}」を獲得` : ''}`,
-      contrarianBonus: (n) => `🔄 逆張りボーナス +${n}pt！`,
-      bigHoleBonus: '💥 大穴ボーナス 2倍払戻！',
-      timeBetBonus: '⏱ 早期ベット 1.5倍！',
-      genreBetBonus: '📌 ジャンル特化 1.2倍！',
-      exportCsv: '📥 今週のクリップをCSVエクスポート',
-      undergroundOn: '💎 アンダーグラウンドON（登録者1000人以下）',
-      undergroundOff: '💎 アンダーグラウンドOFF',
-      researchOn: '🔬 リサーチモードON',
-      researchOff: '🔬 リサーチモードOFF',
-      velocity: (v) => `時速平均 ${v}万回で爆走中！`,
-      gapDisplay: (avg, cur, mult) => `平均 ${avg} ➡️ 今回 ${cur}（${mult}倍！）`,
-      durationInsight: (range) => `現在最もバズっているのは ${range} の動画（黄金比）`,
-      buzzDuration: (flash, tail) => `一過性 ${flash}% / ロングテール ${tail}%`,
-      genreSame: '同ジャンルバズ',
-      genreCross: '異種バズ',
-      notEnoughPoints: 'ポイントが足りません',
     },
     en: {
       loading: 'Scanning for spikes...',
@@ -1202,25 +886,20 @@
   };
 
   // ---- state -------------------------------------------------
-  let LANG = 'ja';
-  let MUTED = localStorage.getItem('buzzshorts_muted') !== 'false';
+  let LANG = localStorage.getItem('buzzshorts_lang') || (navigator.language?.startsWith('ja') ? 'ja' : 'en');
+  let MUTED = localStorage.getItem('buzzshorts_muted') !== 'false'; // デフォルトはミュート
   let currentGenre = 'all';
   let allVideos = [];
   let ytReady = false;
   let activePlayer = null;
   let activeCardId = null;
   let pendingActivate = null;
-  let undergroundFilter = localStorage.getItem('buzzshorts_underground') === 'true';
-  let currentTheme = localStorage.getItem('buzzshorts_theme') || 'acid';
 
   let sortMode = localStorage.getItem('buzzshorts_sort') || 'spike';
   if(!SORT_MODES.includes(sortMode)) sortMode = 'spike';
 
-  let autoplayChain = localStorage.getItem('buzzshorts_autoplay') !== 'false';
+  let autoplayChain = localStorage.getItem('buzzshorts_autoplay') !== 'false'; // デフォルトON
   let progressTimer = null;
-  let watchTimer = null;
-  let watchStartTime = null;
-  let watchVideoId = null;
 
   let favoriteGenres = [];
   try{ favoriteGenres = JSON.parse(localStorage.getItem('buzzshorts_favorites') || '[]'); }catch(e){ favoriteGenres = []; }
@@ -1228,40 +907,17 @@
   let clips = [];
   try{ clips = JSON.parse(localStorage.getItem('buzzshorts_clips') || '[]'); }catch(e){ clips = []; }
 
-  let clipMemos = {};
-  try{ clipMemos = JSON.parse(localStorage.getItem('buzzshorts_clip_memos') || '{}'); }catch(e){ clipMemos = {}; }
-
-  let seasonBadges = [];
-  try{ seasonBadges = JSON.parse(localStorage.getItem('buzzshorts_season_badges') || '[]'); }catch(e){ seasonBadges = []; }
-
-  let bankruptcyState = { watched: [], claimed: false };
-  try{
-    const saved = JSON.parse(localStorage.getItem('buzzshorts_bankruptcy') || 'null');
-    if(saved) bankruptcyState = saved;
-  }catch(e){ /* defaults */ }
-
-  // predictions: { [videoId]: { bets:[{tier,points,predictedAt}], genre, videoTitle, ... } }
+  // ---- 予想ゲーム state ------------------------------------------
+  // predictions: { [videoId]: {tier, confidence, predictedAt, judged, hit, resolvedTier, sixHourGrowthRatio} }
   let predictions = {};
   try{ predictions = JSON.parse(localStorage.getItem('buzzshorts_predictions') || '{}'); }catch(e){ predictions = {}; }
 
+  // predictStats: { streak, bestStreak, totalHit, totalJudged, genreStats:{genre:{hit,total}}, badges:[id,...] }
   let predictStats = {streak:0, bestStreak:0, totalHit:0, totalJudged:0, genreStats:{}, badges:[]};
   try{
     const saved = JSON.parse(localStorage.getItem('buzzshorts_predict_stats') || 'null');
     if(saved) predictStats = Object.assign(predictStats, saved);
   }catch(e){ /* keep defaults */ }
-
-  function getPoints(){
-    const v = localStorage.getItem('buzzshorts_points');
-    return v === null ? INITIAL_POINTS : Number(v);
-  }
-  function setPoints(n){
-    localStorage.setItem('buzzshorts_points', String(Math.max(0, Math.round(n))));
-    updatePointsUI();
-    checkBankruptcy();
-  }
-  function addPoints(n){
-    setPoints(getPoints() + n);
-  }
 
   function savePredictions(){
     localStorage.setItem('buzzshorts_predictions', JSON.stringify(predictions));
@@ -1269,85 +925,22 @@
   function savePredictStats(){
     localStorage.setItem('buzzshorts_predict_stats', JSON.stringify(predictStats));
   }
-  function saveBankruptcy(){
-    localStorage.setItem('buzzshorts_bankruptcy', JSON.stringify(bankruptcyState));
-  }
-  function saveClipMemos(){
-    localStorage.setItem('buzzshorts_clip_memos', JSON.stringify(clipMemos));
-  }
-
-  function applyTheme(themeId){
-    const theme = THEMES[themeId] || THEMES.acid;
-    document.documentElement.style.setProperty('--spike', theme.spike);
-    document.documentElement.style.setProperty('--hot', theme.hot);
-    currentTheme = themeId;
-    localStorage.setItem('buzzshorts_theme', themeId);
-  }
-
-  function getTopPercent(points){
-    for(const [threshold, percent] of RANK_DISTRIBUTION){
-      if(points >= threshold) return percent;
-    }
-    return 100;
-  }
-
-  function checkSeasonReset(){
-    const month = new Date().toISOString().slice(0, 7);
-    const lastMonth = localStorage.getItem('buzzshorts_season_month');
-    if(lastMonth && lastMonth !== month){
-      const finalScore = getPoints();
-      let badge = null;
-      for(const [threshold, label] of SEASON_BADGES){
-        if(finalScore >= threshold) badge = label;
-      }
-      if(badge){
-        seasonBadges.push({ month: lastMonth, score: finalScore, badge });
-        localStorage.setItem('buzzshorts_season_badges', JSON.stringify(seasonBadges));
-      }
-      setPoints(INITIAL_POINTS);
-      showToast(t('seasonReset', badge));
-    }
-    localStorage.setItem('buzzshorts_season_month', month);
-  }
-
-  function grantDailyBonus(){
-    const todayStr = new Date().toDateString();
-    const lastBonus = localStorage.getItem('buzzshorts_last_bonus');
-    if(lastBonus === todayStr) return;
-    const streak = Number(localStorage.getItem('buzzshorts_streak') || '1');
-    const bonus = streak >= 2 ? STREAK_BONUS : DAILY_BONUS;
-    addPoints(bonus);
-    localStorage.setItem('buzzshorts_last_bonus', todayStr);
-    showToast(t('dailyBonus', bonus));
-  }
 
   let modalPillSelection = new Set(favoriteGenres);
 
   const feedEl = document.getElementById('feed');
   const tabsEl = document.getElementById('genreTabs');
+  const langBtn = document.getElementById('langToggle');
   const sortBtn = document.getElementById('sortBtn');
   const autoplayBtn = document.getElementById('autoplayBtn');
-  const langBtn = document.getElementById('langBtn');
   const settingsBtn = document.getElementById('settingsBtn');
-  const pointsBadge = document.getElementById('pointsBadge');
-  const undergroundBtn = document.getElementById('undergroundBtn');
   const streakBadge = document.getElementById('streakBadge');
-  
-  if(pointsBadge) pointsBadge.addEventListener('click', () => {
-    currentGenre = 'predict';
-    renderTabs();
-    renderFeed();
-  });
   const loadingStatus = document.getElementById('loadingStatus');
   const loadingLabel = document.getElementById('loadingLabel');
   const emptyStatus = document.getElementById('emptyStatus');
   const emptyLabel = document.getElementById('emptyLabel');
   const updatedAtEl = document.getElementById('updatedAt');
   const toastEl = document.getElementById('toast');
-  const bankruptcyOverlay = document.getElementById('bankruptcyOverlay');
-  const bankruptcyProgress = document.getElementById('bankruptcyProgress');
-  const bankruptcyClaim = document.getElementById('bankruptcyClaim');
-  const themePickerEl = document.getElementById('themePicker');
 
   const genreModal = document.getElementById('genreModal');
   const modalTitleEl = document.getElementById('modalTitle');
@@ -1438,46 +1031,6 @@
     }
   }
 
-  function updatePointsUI(){
-    pointsBadge.textContent = `💰 ${formatNumber(getPoints())}`;
-  }
-
-  function checkBankruptcy(){
-    if(getPoints() > 0){
-      bankruptcyOverlay.classList.add('hidden');
-      return;
-    }
-    bankruptcyOverlay.classList.remove('hidden');
-    const done = bankruptcyState.watched.length;
-    bankruptcyProgress.textContent = `${done} / ${BANKRUPTCY_VIDEOS_NEEDED} 本完了`;
-    bankruptcyClaim.disabled = done < BANKRUPTCY_VIDEOS_NEEDED || bankruptcyState.claimed;
-  }
-
-  function trackBankruptcyWatch(videoId, seconds){
-    if(getPoints() > 0) return;
-    if(predictions[videoId]) return;
-    const existing = bankruptcyState.watched.find(w => w.id === videoId);
-    if(existing){
-      existing.seconds = Math.max(existing.seconds, seconds);
-    } else if(bankruptcyState.watched.length < BANKRUPTCY_VIDEOS_NEEDED){
-      bankruptcyState.watched.push({ id: videoId, seconds });
-    }
-    bankruptcyState.watched = bankruptcyState.watched.filter(w => w.seconds >= BANKRUPTCY_WATCH_SEC);
-    saveBankruptcy();
-    checkBankruptcy();
-  }
-
-  bankruptcyClaim.addEventListener('click', () => {
-    if(bankruptcyState.watched.length >= BANKRUPTCY_VIDEOS_NEEDED && !bankruptcyState.claimed){
-      bankruptcyState.claimed = true;
-      bankruptcyState.watched = [];
-      saveBankruptcy();
-      setPoints(BANKRUPTCY_RESCUE);
-      bankruptcyOverlay.classList.add('hidden');
-      showToast(t('bankruptcyClaim'));
-    }
-  });
-
   // ---- 予想ゲーム ロジック -----------------------------------------
   function tierLabel(tierId, short){
     const tier = PREDICT_TIERS.find(t => t.id === tierId);
@@ -1499,117 +1052,50 @@
     return t('predictCountdown', h, m);
   }
 
-  function getCurrentGrowthRatio(video){
-    return (video.viewCount || 0) / Math.max(video.firstSeenViewCount || video.viewCount || 1, 1);
-  }
-
-  function calcPayout(video, bet, hit){
-    if(!hit) return 0;
-    let payout = bet.points * TIER_ODDS[bet.tier];
-    const mults = [];
-    if(video.subscriberCount < 100 && bet.tier === 'blast'){
-      payout *= 2;
-      mults.push('bigHole');
-    }
-    if(favoriteGenres.includes(video.genre || bet.genre)){
-      payout *= 1.2;
-      mults.push('genre');
-    }
-    const hoursSinceSeen = (bet.predictedAt - new Date(video.firstSeenAt || video.publishedAt).getTime()) / 3600000;
-    if(hoursSinceSeen <= 1){
-      payout *= 1.5;
-      mults.push('time');
-    }
-    return { payout: Math.round(payout), mults };
-  }
-
-  function submitBet(video, tier, amount){
-    const existing = predictions[video.id];
-    if(video.resolvedTier) return;
-    if(amount <= 0 || amount > getPoints()) {
-      showToast(t('notEnoughPoints'));
-      return;
-    }
-    const totalBet = existing ? existing.bets.reduce((s, b) => s + b.points, 0) : 0;
-    if(totalBet + amount > getPoints()){
-      showToast(t('notEnoughPoints'));
-      return;
-    }
-    setPoints(getPoints() - amount);
-    if(!existing){
-      predictions[video.id] = {
-        bets: [],
-        genre: video.genre,
-        videoTitle: video.title,
-        thumbnail: video.thumbnail,
-        subscriberCount: video.subscriberCount,
-        firstSeenAt: video.firstSeenAt || video.publishedAt,
-        judged: false,
-        totalPayout: 0,
-        anyHit: false,
-      };
-    }
-    predictions[video.id].bets.push({
-      tier, points: amount,
-      predictedAt: Date.now(),
-    });
-    savePredictions();
-    showToast(t('betPlaced', amount, tierLabel(tier, true)));
-  }
-
   function submitPrediction(video, tier, confidence){
-    submitBet(video, tier, 10);
+    if(predictions[video.id] || video.resolvedTier) return; // 予想済み or 既に答えが出てるものは不可
+    predictions[video.id] = {
+      tier, confidence,
+      predictedAt: Date.now(),
+      genre: video.genre,
+      videoTitle: video.title,
+      thumbnail: video.thumbnail,
+      judged: false,
+      hit: null,
+      resolvedTier: null,
+      sixHourGrowthRatio: null,
+    };
+    savePredictions();
   }
 
+  // アプリ起動時に、答え合わせが済んだ動画に対する未判定の予想を採点する
   function checkResolutions(){
     const videoMap = new Map(allVideos.map(v => [v.id, v]));
     let anyNewBadge = null;
     let lastResultToast = null;
-    let pendingCount = 0;
 
     Object.entries(predictions).forEach(([id, p]) => {
       if(p.judged) return;
       const video = videoMap.get(id);
-      if(!video || !video.resolvedTier) { pendingCount++; return; }
+      if(!video || !video.resolvedTier) return; // まだ答えが出てない
 
-      let totalPayout = 0;
-      let anyHit = false;
-      const bets = p.bets || [{ tier: p.tier, points: 10, predictedAt: p.predictedAt }];
-
-      bets.forEach(bet => {
-        const hit = bet.tier === video.resolvedTier;
-        if(hit){
-          anyHit = true;
-          const { payout, mults } = calcPayout(video, bet, true);
-          totalPayout += payout;
-          if(bet.tier === 'slow'){
-            totalPayout += CONTRARIAN_BONUS;
-            showToast(t('contrarianBonus', CONTRARIAN_BONUS));
-          }
-          if(mults.includes('bigHole')) showToast(t('bigHoleBonus'));
-          if(mults.includes('time')) showToast(t('timeBetBonus'));
-          if(mults.includes('genre')) showToast(t('genreBetBonus'));
-        }
-        predictStats.totalJudged++;
-        const g = p.genre || 'other';
-        if(!predictStats.genreStats[g]) predictStats.genreStats[g] = {hit:0, total:0};
-        predictStats.genreStats[g].total++;
-        if(hit){
-          predictStats.totalHit++;
-          predictStats.genreStats[g].hit++;
-        }
-      });
-
+      const hit = p.tier === video.resolvedTier;
       p.judged = true;
-      p.anyHit = anyHit;
-      p.totalPayout = totalPayout;
+      p.hit = hit;
       p.resolvedTier = video.resolvedTier;
       p.sixHourGrowthRatio = video.sixHourGrowthRatio;
 
-      if(anyHit){
-        addPoints(totalPayout);
+      predictStats.totalJudged++;
+      const g = p.genre || 'other';
+      if(!predictStats.genreStats[g]) predictStats.genreStats[g] = {hit:0, total:0};
+      predictStats.genreStats[g].total++;
+
+      if(hit){
+        predictStats.totalHit++;
         predictStats.streak++;
+        predictStats.genreStats[g].hit++;
         if(predictStats.streak > predictStats.bestStreak) predictStats.bestStreak = predictStats.streak;
+
         const tiers = PREDICT_BADGE_TIERS[LANG];
         for(const [threshold, badgeName] of tiers){
           if(predictStats.streak >= threshold && !predictStats.badges.includes(badgeName)){
@@ -1621,13 +1107,13 @@
         predictStats.streak = 0;
       }
 
-      lastResultToast = {hit: anyHit, title: p.videoTitle};
+      lastResultToast = {hit, title: p.videoTitle};
     });
 
     savePredictions();
     savePredictStats();
-    updateAppBadge(pendingCount);
 
+    // トーストはうるさくなりすぎないよう、直近1件だけ通知する
     if(lastResultToast){
       showToast(t('predictResultToast', lastResultToast.hit, lastResultToast.title.slice(0, 24)));
     }
@@ -1636,85 +1122,16 @@
     }
   }
 
-  function updateAppBadge(count){
-    if('setAppBadge' in navigator){
-      if(count > 0) navigator.setAppBadge(count).catch(() => {});
-      else navigator.clearAppBadge().catch(() => {});
-    }
-  }
-
-  function buildPredictProgress(video){
-    const ratio = getCurrentGrowthRatio(video);
-    const maxScale = 5;
-    const pct = Math.min(100, (ratio / maxScale) * 100);
-    const slowEnd = (TIER_BOUNDARIES.slowMax / maxScale) * 100;
-    const blastStart = (TIER_BOUNDARIES.blastMin / maxScale) * 100;
-    return `
-      <div class="predict-progress">
-        <div class="zone slow" style="left:0;width:${slowEnd}%"></div>
-        <div class="zone normal" style="left:${slowEnd}%;width:${blastStart - slowEnd}%"></div>
-        <div class="zone blast" style="left:${blastStart}%;width:${100 - blastStart}%"></div>
-        <div class="marker" style="left:${pct}%"></div>
-      </div>
-    `;
-  }
-
+  // ---- 予想ブロック（動画カード用） ---------------------------------
   function buildPredictBlock(video){
     const wrap = document.createElement('div');
     wrap.className = 'predict-block';
     const existing = predictions[video.id];
 
-    function renderBetList(pred){
-      const bets = pred?.bets || [];
-      if(bets.length === 0) return '<div style="font-size:12px;color:var(--text-dim);">' + t('predictHistoryEmpty') + '</div>';
-      const totalBet = bets.reduce((s, b) => s + (b.points || 0), 0);
-      const rows = bets.map(b => {
-        const date = new Date(b.predictedAt || Date.now());
-        const time = `${date.getHours()}:${String(date.getMinutes()).padStart(2,'0')}`;
-        // compute per-bet bonus tags for display
-        let tagHtml = '';
-        try{
-          const res = calcPayout(video, b, true) || { payout:0, mults:[] };
-          if(res.mults && res.mults.length){
-            tagHtml = '<div style="display:flex;gap:6px;margin-top:6px">' + res.mults.map(m => {
-              if(m === 'bigHole') return `<span class=\"bonus-tag bonus-bighole\">${escapeHTML(t('bigHoleBonus'))}</span>`;
-              if(m === 'time') return `<span class=\"bonus-tag bonus-time\">${escapeHTML(t('timeBetBonus'))}</span>`;
-              if(m === 'genre') return `<span class=\"bonus-tag bonus-genre\">${escapeHTML(t('genreBetBonus'))}</span>`;
-              return '';
-            }).join('') + '</div>';
-          }
-        }catch(e){ tagHtml = ''; }
-        return `<div style="padding:6px 0;border-bottom:1px solid rgba(245,243,238,0.04);"><div style=\"display:flex;justify-content:space-between;align-items:center\"><div style=\"font-size:13px;\"><strong style=\\"color:var(--spike)\\">${tierLabel(b.tier,true)}</strong> ${b.points}pt</div><div style=\"font-size:11px;color:var(--text-dim);\">${time}</div></div>${tagHtml}</div>`;
-      }).join('');
-      const summary = `<div style="font-size:11px;color:var(--spike);margin-top:8px;padding:6px;background:rgba(212,255,61,0.06);border-radius:6px;text-align:center;font-weight:700;">合計ベット: ${totalBet}pt（${bets.length}件）</div>`;
-      return `<div style="margin-top:8px">${rows}${summary}</div>`;
-    }
-
-    function computeSummary(pred){
-      const bets = pred?.bets || [];
-      const totalBet = bets.reduce((s,b)=>s + (b.points||0), 0);
-      const payouts = {};
-      let maxPayout = 0;
-      const multSet = new Set();
-      bets.forEach(b => {
-        try{
-          const res = calcPayout(video, b, true) || { payout:0, mults:[] };
-          const payout = res.payout || 0;
-          payouts[b.tier] = (payouts[b.tier] || 0) + payout;
-          if(res.mults && res.mults.length){ res.mults.forEach(m => multSet.add(m)); }
-        }catch(e){ }
-      });
-      // max payout should reflect the max across tiers (if that tier hits, sum of bets for that tier)
-      maxPayout = Object.values(payouts).reduce((m, v) => Math.max(m, v || 0), 0);
-      return { totalBet, payouts, maxPayout, mults: Array.from(multSet) };
-    }
-
     if(existing && existing.judged){
-      const hitClass = existing.anyHit ? 'hit' : 'miss';
-      const hitText = existing.anyHit ? `${t('predictHit')} +${existing.totalPayout}pt` : t('predictMiss');
       wrap.innerHTML = `
         <div class="predict-result">
-          <span class="${hitClass}">${hitText}</span>
+          <span class="${existing.hit ? 'hit' : 'miss'}">${existing.hit ? t('predictHit') : t('predictMiss')}</span>
           <span>${t('predictActual', existing.sixHourGrowthRatio ?? '—')}</span>
           <button class="predict-share-btn" type="button">${t('predictShare')}</button>
         </div>
@@ -1727,87 +1144,43 @@
     }
 
     if(existing && !existing.judged){
-      const sum = computeSummary(existing);
-      const payoutsHtml = Object.entries(sum.payouts).map(([tier,v])=>`<div style="font-size:12px;color:var(--text);">${tierLabel(tier,true)}: <strong style=\"color:var(--spike)\">+${formatNumber(v)}pt</strong></div>`).join('');
       wrap.innerHTML = `
         <div class="predict-countdown" data-video-id="${video.id}">${formatCountdown(video)}</div>
-        ${buildPredictProgress(video)}
-        <div style="background:rgba(212,255,61,0.06);border-radius:10px;padding:10px 8px;margin-top:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-            <div style="font-size:12px;color:var(--text-dim);">${t('hedgeInfo', sum.totalBet)}</div>
-            <div style="font-size:12px;color:var(--spike);font-weight:700;">期待最大: +${formatNumber(sum.maxPayout)}pt</div>
-          </div>
-          <div style="font-size:10px;color:var(--text-dim);">${payoutsHtml}</div>
-        </div>
-        <div style="margin-top:8px">${renderBetList(existing)}</div>
+        <div class="predict-waiting">${t('predictMade', tierLabel(existing.tier, true))}</div>
       `;
       return wrap;
     }
 
     if(video.resolvedTier){
-      wrap.innerHTML = `<div class="predict-waiting">${t('predictActual', video.sixHourGrowthRatio ?? '—')}</div>`;
+      // 予想しないまま答えが出てしまった動画（もう予想は受け付けない）
+      wrap.innerHTML = `
+        <div class="predict-waiting">${t('predictActual', video.sixHourGrowthRatio ?? '—')}</div>
+      `;
       return wrap;
     }
 
-    // betting UI (no existing bets)
-    let selectedAmount = 10;
-    let selectedTier = 'blast';
-    function renderControls(){
-      const amtBtns = BET_AMOUNTS.map(a => `<button class=\"bet-amount-btn${a===selectedAmount?' active':''}\" data-amount=\"${a}\" type=\"button\">${a}pt</button>`).join('');
-      const tierBtns = PREDICT_TIERS.map(tr => `<button class=\"predict-tier-btn${tr.id===selectedTier?' active':''}\" data-tier=\"${tr.id}\" type=\"button\">${tr[LANG]} ×${TIER_ODDS[tr.id]}</button>`).join('');
-      return `
-        <div class="predict-countdown" data-video-id="${video.id}">${formatCountdown(video)}</div>
-        ${buildPredictProgress(video)}
-        <div class="bet-amount-row">${amtBtns}</div>
-        <div class="predict-tier-row">${tierBtns}</div>
-        <div class="hedge-summary" style="margin-top:8px;">${t('hedgeInfo', 0)}</div>
-        <div class="bonus-tags" style="margin-top:6px;display:flex;gap:6px;"></div>
-        <div class="expected-payout" style="margin-top:6px;font-size:12px;color:var(--spike);">期待払い戻し: 0pt</div>
-      `;
-    }
+    wrap.innerHTML = `
+      <div class="predict-countdown" data-video-id="${video.id}">${formatCountdown(video)}</div>
+      <div class="predict-tier-row">
+        ${PREDICT_TIERS.map(tr => `<button class="predict-tier-btn" data-tier="${tr.id}" type="button">${tr[LANG]}</button>`).join('')}
+      </div>
+      <div class="predict-confidence-row">
+        ${CONFIDENCE_LEVELS.map(c => `<button class="predict-confidence-btn${c.id==='normal' ? ' active' : ''}" data-confidence="${c.id}" type="button">${c[LANG]}</button>`).join('')}
+      </div>
+    `;
 
-    wrap.innerHTML = renderControls();
-
-    function updateSummaryUI(){
-      const existingPred = predictions[video.id];
-      const total = existingPred ? existingPred.bets.reduce((s,b)=>s+(b.points||0),0) : 0;
-      const fakePred = existingPred ? existingPred : { bets: [{ tier: selectedTier, points: selectedAmount, predictedAt: Date.now() }] };
-      const sum = computeSummary(fakePred);
-      const hedge = wrap.querySelector('.hedge-summary');
-      const expectEl = wrap.querySelector('.expected-payout');
-      const bonusContainer = wrap.querySelector('.bonus-tags');
-      if(hedge) hedge.textContent = t('hedgeInfo', sum.totalBet);
-      if(expectEl) expectEl.textContent = `期待払い戻し: +${formatNumber(sum.maxPayout)}pt`;
-      if(bonusContainer){
-        if(sum.mults && sum.mults.length){
-          bonusContainer.innerHTML = sum.mults.map(m => {
-            if(m === 'bigHole') return `<span class="bonus-tag bonus-bighole">${escapeHTML(t('bigHoleBonus'))}</span>`;
-            if(m === 'time') return `<span class="bonus-tag bonus-time">${escapeHTML(t('timeBetBonus'))}</span>`;
-            if(m === 'genre') return `<span class="bonus-tag bonus-genre">${escapeHTML(t('genreBetBonus'))}</span>`;
-            return '';
-          }).join('');
-        } else {
-          bonusContainer.innerHTML = '';
-        }
-      }
-    }
-
-    wrap.querySelectorAll('.bet-amount-btn').forEach(btn => {
+    let selectedConfidence = 'normal';
+    wrap.querySelectorAll('.predict-confidence-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        selectedAmount = Number(btn.dataset.amount);
-        wrap.querySelectorAll('.bet-amount-btn').forEach(b => b.classList.toggle('active', b === btn));
-        updateSummaryUI();
+        selectedConfidence = btn.dataset.confidence;
+        wrap.querySelectorAll('.predict-confidence-btn').forEach(b => b.classList.toggle('active', b === btn));
       });
     });
     wrap.querySelectorAll('.predict-tier-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        selectedTier = btn.dataset.tier;
-        wrap.querySelectorAll('.predict-tier-btn').forEach(b => b.classList.toggle('active', b === btn));
-        // perform bet
-        submitBet(video, selectedTier, selectedAmount);
-        // replace block with fresh (shows bet history)
+        submitPrediction(video, btn.dataset.tier, selectedConfidence);
         const card = wrap.closest('.card');
         if(card){
           const fresh = buildPredictBlock(video);
@@ -1816,51 +1189,8 @@
       });
     });
 
-    // initial summary update
-    updateSummaryUI();
     return wrap;
   }
-
-  // ---- swipe gesture handler (mobile) ----
-  let touchStartX = 0;
-  let touchEndX = 0;
-  function handleSwipe(){
-    if(!feedEl || !activeCardId) return;
-    const swipeThreshold = 50;
-    const diff = touchEndX - touchStartX;
-    if(Math.abs(diff) < swipeThreshold) return;
-    
-    const cards = feedEl.querySelectorAll('.card');
-    const currentIndex = Array.from(cards).findIndex(c => c.dataset.videoId === activeCardId);
-    if(currentIndex < 0) return;
-    
-    if(diff > 0 && currentIndex > 0){
-      // swipe right → prev
-      cards[currentIndex - 1].scrollIntoView({behavior:'smooth', block:'start'});
-    } else if(diff < 0 && currentIndex < cards.length - 1){
-      // swipe left → next
-      cards[currentIndex + 1].scrollIntoView({behavior:'smooth', block:'start'});
-    }
-  }
-  feedEl.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-  }, false);
-  feedEl.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  }, false);
-
-  // ---- keyboard navigation ----
-  document.addEventListener('keydown', (e) => {
-    if(currentGenre === 'predict') return;
-    const cards = feedEl.querySelectorAll('.card');
-    if(!cards.length || !activeCardId) return;
-    const curIdx = Array.from(cards).findIndex(c => c.dataset.videoId === activeCardId);
-    if(curIdx < 0) return;
-    if(e.key === 'ArrowRight' && curIdx < cards.length - 1){ e.preventDefault(); cards[curIdx + 1].scrollIntoView({behavior:'smooth', block:'start'}); }
-    else if(e.key === 'ArrowLeft' && curIdx > 0){ e.preventDefault(); cards[curIdx - 1].scrollIntoView({behavior:'smooth', block:'start'}); }
-    else if(e.key === ' '){ e.preventDefault(); if(activePlayer){ const state = activePlayer.getPlayerState(); state === YT.PlayerState.PLAYING ? activePlayer.pauseVideo() : activePlayer.playVideo(); } }
-  }, false);
 
   // ---- 結果シェアカード（Canvas生成） --------------------------------
   function shareResultCard(video, prediction){
@@ -1928,172 +1258,6 @@
     if(line) ctx.fillText(line, x, curY);
   }
 
-  // ---- データ分析ヘルパー -----------------------------------------
-  function calcVelocity(video){
-    const elapsed = Math.max(0.5, (Date.now() - new Date(video.firstSeenAt || video.publishedAt).getTime()) / 3600000);
-    const delta = Math.max(0, (video.viewCount || 0) - (video.firstSeenViewCount || 0));
-    const perHour = delta / elapsed;
-    return (perHour / 10000).toFixed(1);
-  }
-
-  function calcBuzzDuration(video){
-    const velocity = Number(calcVelocity(video));
-    const spike = video.spikeRatio || video.growthRatio || 1;
-    const flashPct = Math.min(95, Math.max(5, Math.round(100 - velocity * 8 - spike * 2)));
-    return { flash: flashPct, tail: 100 - flashPct };
-  }
-
-  function buildAnalyticsPanel(video){
-    const spikeRatio = video.spikeRatio || (video.viewCount / Math.max(video.subscriberCount, 1));
-    const gaugePct = Math.min(100, spikeRatio / 50 * 100);
-    const avgViews = video.estimatedAvgViews || Math.round(video.subscriberCount * 0.08);
-    const gapMult = video.avgGapMultiplier || Math.round(video.viewCount / Math.max(avgViews, 1));
-    const velocity = calcVelocity(video);
-    const buzz = video.buzzKeywords || [];
-    const templates = video.editTemplates || [];
-    const grade = video.engagementGrade || 'B';
-    const genreTag = video.genreSpecialization === 'cross-buzz' ? t('genreCross') : t('genreSame');
-    const duration = video.durationSeconds ? `${video.durationSeconds}秒` : '';
-    const buzzDur = calcBuzzDuration(video);
-
-    let kwHTML = buzz.map(k => `<span>${escapeHTML(k)}</span>`).join('');
-    let tagHTML = templates.map(tg => `<span class="analysis-tag">${escapeHTML(tg)}</span>`).join('');
-    tagHTML += `<span class="analysis-tag">${genreTag}</span>`;
-    if(duration) tagHTML += `<span class="analysis-tag">${duration}</span>`;
-
-    return `
-      <div class="analytics-panel">
-        <div class="spike-gauge"><div class="needle" style="left:${gaugePct}%"></div></div>
-        <div class="gap-display">${t('gapDisplay', formatNumber(avgViews), formatNumber(video.viewCount), gapMult)}</div>
-        <div class="velocity-meter">${t('velocity', velocity)}</div>
-        <div class="engagement-grade">Engagement: ${grade}</div>
-        <div class="buzz-kw">${kwHTML}</div>
-        <div class="analysis-tags">${tagHTML}</div>
-        <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">${t('buzzDuration', buzzDur.flash, buzzDur.tail)}</div>
-      </div>
-    `;
-  }
-
-  // ===== Bonus tags helper (HTML) =====
-  function renderBonusTagsHTML(video){
-    const tags = [];
-    try{
-      const subs = Number(video.subscriberCount || 0);
-      if(subs < 100){ tags.push({k:'bigHole', cls:'bonus-bighole', label: t('bigHoleBonus')}); }
-      const firstSeen = new Date(video.firstSeenAt || video.publishedAt).getTime();
-      if(!isNaN(firstSeen) && (Date.now() - firstSeen) <= 3600000){ tags.push({k:'time', cls:'bonus-time', label: t('timeBetBonus')}); }
-      // genre bonus (favorite genres) — show tag if video genre is in user's favorites
-      if(favoriteGenres && favoriteGenres.includes(video.genre)){
-        tags.push({k:'genre', cls:'bonus-genre', label: t('genreBetBonus')});
-      }
-      if(tags.length === 0) return '';
-      return `<div class="analysis-tags bonus-tags">${tags.map(tt => `<span class="bonus-tag ${tt.cls}">${escapeHTML(tt.label)}</span>`).join('')}</div>`;
-    }catch(e){ return ''; }
-  }
-
-  function buildRadarChart(){
-    const genres = GENRES.filter(g => g.id !== 'all').slice(0, 6);
-    const cx = 100, cy = 100, r = 70;
-    const points = genres.map((g, i) => {
-      const angle = (Math.PI * 2 * i / genres.length) - Math.PI / 2;
-      const stats = predictStats.genreStats[g.id] || { hit: 0, total: 1 };
-      const rate = stats.total > 0 ? stats.hit / stats.total : 0;
-      const dist = r * Math.max(0.15, rate);
-      return { x: cx + Math.cos(angle) * dist, y: cy + Math.sin(angle) * dist, label: g.ja };
-    });
-    const poly = points.map(p => `${p.x},${p.y}`).join(' ');
-    const axes = genres.map((g, i) => {
-      const angle = (Math.PI * 2 * i / genres.length) - Math.PI / 2;
-      const x2 = cx + Math.cos(angle) * r;
-      const y2 = cy + Math.sin(angle) * r;
-      const lx = cx + Math.cos(angle) * (r + 16);
-      const ly = cy + Math.sin(angle) * (r + 16);
-      return `<line x1="${cx}" y1="${cy}" x2="${x2}" y2="${y2}" stroke="rgba(245,243,238,0.12)" stroke-width="1"/>
-        <text x="${lx}" y="${ly}" fill="var(--text-dim)" font-size="7" text-anchor="middle">${g.ja}</text>`;
-    }).join('');
-    return `<svg class="radar-chart" viewBox="0 0 200 200">${axes}
-      <polygon points="${poly}" fill="rgba(212,255,61,0.2)" stroke="var(--spike)" stroke-width="1.5"/>
-    </svg>`;
-  }
-
-  function buildHeatmap(){
-    const grid = new Array(24).fill(0);
-    const displayable = allVideos.filter(v => !v.predictionOnly);
-    displayable.forEach(v => {
-      const h = new Date(v.publishedAt).getHours();
-      grid[h] += v.growthRatio || 1;
-    });
-    const max = Math.max(...grid, 1);
-    const cells = grid.map((v, i) => {
-      const intensity = v / max;
-      const color = intensity > 0.6 ? 'var(--hot)' : intensity > 0.3 ? 'var(--spike)' : 'rgba(245,243,238,0.06)';
-      return `<div class="heatmap-cell" style="background:${color}" title="${i}時"></div>`;
-    }).join('');
-    return `<div class="heatmap-labels"><span>0時</span><span>6時</span><span>12時</span><span>18時</span><span>23時</span></div><div class="heatmap">${cells}</div>`;
-  }
-
-  function buildDurationInsight(){
-    const durations = allVideos.filter(v => v.durationSeconds).map(v => v.durationSeconds);
-    if(!durations.length) return '';
-    const buckets = { '15-30秒': 0, '30-45秒': 0, '45-60秒': 0 };
-    durations.forEach(d => {
-      if(d < 30) buckets['15-30秒'] += 1;
-      else if(d < 45) buckets['30-45秒'] += 1;
-      else buckets['45-60秒'] += 1;
-    });
-    const best = Object.entries(buckets).sort((a, b) => b[1] - a[1])[0][0];
-    return t('durationInsight', best);
-  }
-
-  function buildAudioTrends(){
-    const counts = {};
-    allVideos.forEach(v => {
-      const hint = v.audioHint || '不明音源';
-      counts[hint] = (counts[hint] || 0) + 1;
-    });
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5)
-      .map(([name, n]) => `${name} (${n})`).join('<br>');
-  }
-
-  function exportClipsCsv(){
-    const weekAgo = Date.now() - 7 * 86400000;
-    const rows = clips.filter(c => (c.savedAt || 0) >= weekAgo);
-    if(!rows.length){ showToast('エクスポート対象なし'); return; }
-    const header = 'URL,タイトル,登録者,再生数,倍率,メモ';
-    const body = rows.map(c => {
-      const ratio = c.growthRatio || Math.round((c.viewCount||0)/Math.max(c.subscriberCount||1,1));
-      const memo = (clipMemos[c.id] || '').replace(/"/g, '""');
-      return `"https://youtube.com/shorts/${c.id}","${(c.title||'').replace(/"/g,'""')}",${c.subscriberCount||0},${c.viewCount||0},${ratio},"${memo}"`;
-    }).join('\n');
-    const blob = new Blob(['\uFEFF' + header + '\n' + body], {type:'text/csv'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'buzzshorts-clips.csv';
-    a.click();
-  }
-
-  // ---- bet history CSV export ----
-  function exportBetHistoryCsv(){
-    const weekAgo = Date.now() - 30 * 86400000;
-    const rows = Object.entries(predictions)
-      .filter(([id, p]) => (p.bets?.[0]?.predictedAt || 0) >= weekAgo)
-      .map(([id, p]) => {
-        const bets = p.bets || [];
-        const totalBet = bets.reduce((s, b) => s + (b.points || 0), 0);
-        const tier = bets[0]?.tier || p.tier || '';
-        const status = p.judged ? (p.anyHit ? '的中' : 'ハズレ') : '答え合わせ待ち';
-        return `"https://youtube.com/shorts/${id}","${(p.videoTitle||'').replace(/"/g,'""')}",${tier},${totalBet},${p.totalPayout||0},${status}`;
-      });
-    if(!rows.length){ showToast('エクスポート対象なし'); return; }
-    const header = 'URL,動画タイトル,その他ベット,総ベット額(pt),獲得額(pt),判定';
-    const body = rows.join('\n');
-    const blob = new Blob(['\uFEFF' + header + '\n' + body], {type:'text/csv'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'buzzshorts-bets.csv';
-    a.click();
-  }
-
   // ---- 予想ダッシュボード（予想タブ） ---------------------------------
   function buildPredictDashCard(){
     const card = document.createElement('div');
@@ -2101,76 +1265,58 @@
 
     const total = predictStats.totalJudged;
     const rate = total > 0 ? Math.round((predictStats.totalHit / total) * 100) : 0;
-    const points = getPoints();
-    const topPct = getTopPercent(points);
 
-    const badgeHTML = predictStats.badges.map(b => `<span class="predict-badge-pill">🏅 ${b}</span>`).join('');
-    const seasonHTML = seasonBadges.map(s => `<span class="season-badge">${s.badge} (${s.month}: ${s.score}pt)</span>`).join('');
-
-    const history = Object.entries(predictions)
-      .sort((a, b) => {
-        const ta = (a[1].bets?.[0]?.predictedAt || a[1].predictedAt || 0);
-        const tb = (b[1].bets?.[0]?.predictedAt || b[1].predictedAt || 0);
-        return tb - ta;
-      })
-      .slice(0, 30)
-      .map(([id, p]) => {
-        const betsText = (p.bets || [{tier: p.tier, points: 10}]).map(b => `${tierLabel(b.tier, true)} ${b.points}pt`).join('+');
-        const statusHTML = p.judged
-          ? `<span class="${p.anyHit ? 'hit' : 'miss'}">${p.anyHit ? `🎯 +${p.totalPayout}pt` : t('predictMiss')}</span>`
-          : `<span>${t('predictPending')}</span>`;
-        // small bonus tags if determinable from stored prediction snapshot
-        let tagsHtml = '';
-        try{
-          if(Number(p.subscriberCount || 0) < 100) tagsHtml += `<span class="bonus-tag bonus-bighole">${escapeHTML(t('bigHoleBonus'))}</span>`;
-          const firstSeen = p.firstSeenAt ? new Date(p.firstSeenAt).getTime() : null;
-          const firstBetAt = (p.bets && p.bets[0] && p.bets[0].predictedAt) || p.predictedAt || null;
-          if(firstSeen && firstBetAt && ((firstBetAt - firstSeen) <= 3600000)) tagsHtml += `<span class="bonus-tag bonus-time">${escapeHTML(t('timeBetBonus'))}</span>`;
-        }catch(e){ tagsHtml = ''; }
-        return `<div class="predict-history-item"><img src="${p.thumbnail||''}" alt="" loading="lazy"><div class="info"><div class="title">${escapeHTML(p.videoTitle||'')}</div><div class="meta">${betsText} ・ ${statusHTML} ${tagsHtml}</div></div></div>`;
+    const genreRows = Object.entries(predictStats.genreStats)
+      .filter(([, s]) => s.total > 0)
+      .sort((a, b) => b[1].total - a[1].total)
+      .map(([g, s]) => {
+        const label = GENRES.find(x => x.id === g)?.[LANG] || g;
+        const r = Math.round((s.hit / s.total) * 100);
+        return `<div class="predict-history-item"><div class="info"><div class="title">${label}</div><div class="meta">${s.hit}/${s.total} (${r}%)</div></div></div>`;
       }).join('');
 
-    const exportBtn = buildPredictDashButton();
+    const badgeHTML = predictStats.badges.length
+      ? predictStats.badges.map(b => `<span class="predict-badge-pill">🏅 ${b}</span>`).join('')
+      : '';
+
+    const history = Object.entries(predictions)
+      .sort((a, b) => b[1].predictedAt - a[1].predictedAt)
+      .slice(0, 30)
+      .map(([id, p]) => {
+        const statusHTML = p.judged
+          ? `<span class="${p.hit ? 'hit' : 'miss'}">${p.hit ? t('predictHit') : t('predictMiss')}</span> ・ ${t('predictActual', p.sixHourGrowthRatio ?? '—')}`
+          : `<span>${t('predictPending')}</span>`;
+        return `
+          <div class="predict-history-item">
+            <img src="${p.thumbnail || ''}" alt="" loading="lazy">
+            <div class="info">
+              <div class="title">${escapeHTML(p.videoTitle || '')}</div>
+              <div class="meta">${t('predictMade', tierLabel(p.tier, true))} ・ ${statusHTML}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
     card.innerHTML = `
       <h2>${t('predictDashTitle')}</h2>
-      <div class="rank-badge">${t('predictRanking', topPct)}</div>`;
-    const rankBadgeChild = card.querySelector('.rank-badge');
-    if(rankBadgeChild) rankBadgeChild.after(exportBtn);
-    card.innerHTML += `
       <div class="predict-stat-grid">
-        <div class="predict-stat"><span class="num">${points}</span><span class="label">${t('predictStatPoints')}</span></div>
         <div class="predict-stat"><span class="num">${predictStats.streak}</span><span class="label">${t('predictStatStreak')}</span></div>
+        <div class="predict-stat"><span class="num">${predictStats.bestStreak}</span><span class="label">${t('predictStatBest')}</span></div>
         <div class="predict-stat"><span class="num">${rate}%</span><span class="label">${t('predictStatRate')}</span></div>
       </div>
       <div class="predict-badges">${badgeHTML}</div>
-      ${seasonHTML ? `<div style="margin-bottom:14px;">${seasonHTML}</div>` : ''}
-      ${buildRadarChart()}
-      <div class="dash-section"><h3>📊 投稿時間帯ヒートマップ</h3>${buildHeatmap()}</div>
-      <div class="dash-section"><h3>⏱ 尺分析</h3><p style="font-size:12px;color:var(--text-dim);">${buildDurationInsight()}</p></div>
-      <div class="dash-section"><h3>🎵 音声トレンド</h3><div class="audio-trend-list">${buildAudioTrends()}</div></div>
+      ${genreRows}
       ${history || `<p style="color:var(--text-dim);font-size:12.5px;line-height:1.7;">${t('predictHistoryEmpty')}</p>`}
     `;
     return card;
   }
 
-  // 予想カード上のカウントダウン・進捗バーを定期更新
+  // 予想カード上のカウントダウン表示を定期更新する
   setInterval(() => {
     document.querySelectorAll('.predict-countdown[data-video-id]').forEach(el => {
       const video = allVideos.find(v => v.id === el.dataset.videoId);
       if(!video) return;
       el.textContent = formatCountdown(video);
-    });
-    document.querySelectorAll('.predict-block').forEach(block => {
-      const countdown = block.querySelector('.predict-countdown[data-video-id]');
-      if(!countdown) return;
-      const video = allVideos.find(v => v.id === countdown.dataset.videoId);
-      if(!video) return;
-      const old = block.querySelector('.predict-progress');
-      if(old){
-        const fresh = document.createElement('div');
-        fresh.innerHTML = buildPredictProgress(video);
-        old.replaceWith(fresh.firstElementChild);
-      }
     });
   }, 30000);
 
@@ -2198,7 +1344,7 @@
     });
 
     GENRES.forEach(g => {
-      const present = g.id === 'all' || allVideos.some(v => v.genre === g.id);
+      const present = g.id === 'all' || allVideos.some(v => v.genre === g.id && (v.sourceLang || 'ja') === LANG);
       if(!present) return;
       const btn = document.createElement('button');
       btn.className = 'genre-tab' + (g.id === currentGenre ? ' active' : '');
@@ -2227,9 +1373,9 @@
   }
 
   // ---- card ------------------------------------------------------
-  function buildCard(video, isHero, isMvp){
+  function buildCard(video, isHero){
     const card = document.createElement('section');
-    card.className = 'card' + (isMvp ? ' mvp' : '');
+    card.className = 'card';
     card.dataset.videoId = video.id;
 
     const genreLabel = GENRES.find(g => g.id === video.genre)?.[LANG] || video.genre;
@@ -2248,15 +1394,14 @@
         <button class="round-btn clip-toggle${isClipped(video.id) ? ' active' : ''}" aria-label="save">
           ${clipIcon(isClipped(video.id))}
         </button>
-        <a class="creator-btn" href="https://socialblade.com/youtube/channel/${video.channelId}" target="_blank" rel="noopener" title="クリエイター分析" onclick="event.stopPropagation()">🔍</a>
         <button class="round-btn sound-toggle" aria-label="toggle sound">
           ${soundIcon()}
         </button>
         <div class="overlay">
           <div class="overlay-main">
-            <div class="eyebrow${isHero || isMvp ? ' hot' : ''}">
+            <div class="eyebrow${isHero ? ' hot' : ''}">
               <span class="dot"></span>
-              ${isMvp ? '🏆 バズ大賞 · ' : isHero ? t('heroLabel') + ' · ' : ''}${t('spike', ratio)}
+              ${isHero ? t('heroLabel') + ' · ' : ''}${t('spike', ratio)}
             </div>
             <div class="genre-pill">${genreLabel}</div>
             <div class="channel">${escapeHTML(video.channelTitle)} · ${t('hoursAgo', hoursAgo(video.publishedAt))}</div>
@@ -2265,28 +1410,13 @@
               <span>${t('views', formatNumber(video.viewCount))}</span>
               <span>${t('subs', formatNumber(video.subscriberCount))}</span>
             </div>
-            ${renderBonusTagsHTML(video)}
-            ${buildAnalyticsPanel(video)}
           </div>
-          ${spikeMeterHTML(ratio, isHero || isMvp)}
+          ${spikeMeterHTML(ratio, isHero)}
         </div>
       </div>
     `;
 
     card.querySelector('.overlay-main').appendChild(buildPredictBlock(video));
-
-    if(currentGenre === 'clips'){
-      const memo = document.createElement('textarea');
-      memo.className = 'clip-memo';
-      memo.placeholder = '編集技術メモ...';
-      memo.value = clipMemos[video.id] || '';
-      memo.addEventListener('click', e => e.stopPropagation());
-      memo.addEventListener('input', () => {
-        clipMemos[video.id] = memo.value;
-        saveClipMemos();
-      });
-      card.querySelector('.overlay-main').appendChild(memo);
-    }
 
     card.querySelector('.sound-toggle').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2349,10 +1479,10 @@
     // 表示枠から間引かれた動画なので、通常のフィードには出さない。
     // sourceLang: 動画のタイトル言語。EN/JP切り替えタブに合わせて出す動画も切り替える
     //（sourceLangが無い古いデータはJP扱いにする）。
-    const displayableVideos = allVideos.filter(v => !v.predictionOnly);
+    const displayableVideos = allVideos.filter(v => !v.predictionOnly && (v.sourceLang || 'ja') === LANG);
 
     if(currentGenre === 'clips'){
-      list = clips.slice();
+      list = clips.slice(); // 保存した順（新しい順）のまま
     } else if(currentGenre === 'myfeed'){
       list = displayableVideos.filter(v => favoriteGenres.includes(v.genre));
       allowHero = true;
@@ -2363,10 +1493,7 @@
       list = displayableVideos.filter(v => v.genre === currentGenre);
     }
 
-    if(undergroundFilter){
-      list = list.filter(v => (v.subscriberCount || 0) <= 1000);
-    }
-
+    // クリップタブは保存した順を保持。それ以外は選択中の並び替えモードを適用
     if(currentGenre !== 'clips'){
       if(sortMode === 'new'){
         list.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
@@ -2384,40 +1511,9 @@
     }
     emptyStatus.classList.add('hidden');
 
-    if(currentGenre === 'clips'){
-      const exportBtn = document.createElement('button');
-      exportBtn.className = 'export-btn';
-      exportBtn.textContent = t('exportCsv');
-      exportBtn.addEventListener('click', exportClipsCsv);
-      const exportBetBtn = document.createElement('button');
-      exportBetBtn.className = 'export-btn';
-      exportBetBtn.textContent = '📥 予想履歴をCSVエクスポート';
-      exportBetBtn.addEventListener('click', exportBetHistoryCsv);
-      const exportCard = document.createElement('section');
-      exportCard.className = 'card';
-      exportCard.style.height = 'auto';
-      exportCard.style.minHeight = '120px';
-      exportCard.style.display = 'flex';
-      exportCard.style.flexDirection = 'column';
-      exportCard.style.gap = '10px';
-      exportCard.style.padding = '20px';
-      exportCard.appendChild(exportBtn);
-      exportCard.appendChild(exportBetBtn);
-      feedEl.appendChild(exportCard);
-    }
-
-    let mvpId = null;
-    if(allowHero && sortMode === 'spike' && list.length > 0){
-      const today = new Date().toDateString();
-      const todayVideos = list.filter(v => new Date(v.publishedAt).toDateString() === today || new Date(v.firstSeenAt || v.publishedAt).toDateString() === today);
-      const mvpPool = todayVideos.length ? todayVideos : list;
-      mvpId = mvpPool.reduce((best, v) => (v.growthRatio||0) > (best.growthRatio||0) ? v : best, mvpPool[0]).id;
-    }
-
     list.forEach((video, i) => {
-      const isMvp = video.id === mvpId;
-      const isHero = allowHero && sortMode === 'spike' && i === 0 && !isMvp;
-      feedEl.appendChild(buildCard(video, isHero, isMvp));
+      const isHero = allowHero && sortMode === 'spike' && i === 0;
+      feedEl.appendChild(buildCard(video, isHero));
     });
 
     feedEl.scrollTop = 0;
@@ -2496,10 +1592,7 @@
   function startProgressTimer(card, player){
     stopProgressTimer();
     const fill = card.querySelector('.autoplay-progress .fill');
-    const videoId = card.dataset.videoId;
     if(!fill) return;
-    watchVideoId = videoId;
-    watchStartTime = Date.now();
     progressTimer = setInterval(() => {
       try{
         const duration = player.getDuration();
@@ -2507,13 +1600,7 @@
         if(duration > 0){
           fill.style.width = Math.min(100, (current / duration) * 100) + '%';
         }
-        if(getPoints() === 0 && !predictions[videoId]){
-          const watched = Math.floor(current);
-          if(watched >= BANKRUPTCY_WATCH_SEC){
-            trackBankruptcyWatch(videoId, watched);
-          }
-        }
-      }catch(err){}
+      }catch(err){ /* プレイヤー破棄直後の呼び出しは無視 */ }
     }, 200);
   }
 
@@ -2568,15 +1655,6 @@
     feedEl.querySelectorAll('.card').forEach(card => observer.observe(card));
   }
 
-  // ---- predict dash export button ----
-  function buildPredictDashButton(){
-    const btn = document.createElement('button');
-    btn.className = 'export-btn';
-    btn.textContent = '📥 予想統計をCSVエクスポート';
-    btn.addEventListener('click', exportBetHistoryCsv);
-    return btn;
-  }
-
   // ---- 並び替え ------------------------------------------------
   sortBtn.addEventListener('click', () => {
     const idx = SORT_MODES.indexOf(sortMode);
@@ -2597,7 +1675,8 @@
     autoplayChain = !autoplayChain;
     localStorage.setItem('buzzshorts_autoplay', autoplayChain);
     applyAutoplayBtnLabel();
-    showToast(autoplayChain ? t('autoplayOn') : t('researchOn'));
+    showToast(autoplayChain ? t('autoplayOn') : t('autoplayOff'));
+    // 設定変更を即座に反映するため、現在再生中のプレイヤーを再起動
     if(activeCardId){
       const card = feedEl.querySelector(`.card[data-video-id="${activeCardId}"]`);
       if(card) activateCard(card);
@@ -2606,40 +1685,14 @@
 
   function applyAutoplayBtnLabel(){
     autoplayBtn.classList.toggle('autoplay-on', autoplayChain);
-    autoplayBtn.classList.toggle('research-on', !autoplayChain);
-    autoplayBtn.textContent = autoplayChain ? '▶▶' : '🔬';
   }
-
-  undergroundBtn.addEventListener('click', () => {
-    undergroundFilter = !undergroundFilter;
-    localStorage.setItem('buzzshorts_underground', undergroundFilter);
-    undergroundBtn.classList.toggle('filter-on', undergroundFilter);
-    showToast(undergroundFilter ? t('undergroundOn') : t('undergroundOff'));
-    renderFeed();
-  });
 
   // ---- ジャンル設定モーダル ---------------------------------------
   function openGenreModal(){
     modalPillSelection = new Set(favoriteGenres);
     renderModalPills();
-    renderThemePicker();
     applyModalLangUI();
     genreModal.classList.remove('hidden');
-  }
-  function renderThemePicker(){
-    themePickerEl.innerHTML = '';
-    Object.entries(THEMES).forEach(([id, theme]) => {
-      const swatch = document.createElement('div');
-      swatch.className = 'theme-swatch' + (currentTheme === id ? ' active' : '');
-      swatch.style.background = `linear-gradient(135deg, ${theme.spike}, ${theme.hot})`;
-      swatch.title = theme.label;
-      swatch.addEventListener('click', () => {
-        applyTheme(id);
-        themePickerEl.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
-        swatch.classList.add('active');
-      });
-      themePickerEl.appendChild(swatch);
-    });
   }
   function closeGenreModal(){
     genreModal.classList.add('hidden');
@@ -2696,62 +1749,39 @@
 
   function applyLangUI(){
     document.documentElement.lang = LANG;
-    if(langBtn) langBtn.textContent = I18N[LANG].langBtn;
+    langBtn.textContent = t('langBtn');
     loadingLabel.textContent = t('loading').toUpperCase();
     applySortBtnLabel();
     applyAutoplayBtnLabel();
-    updatePointsUI();
-    undergroundBtn.classList.toggle('filter-on', undergroundFilter);
     if(!genreModal.classList.contains('hidden')) applyModalLangUI();
   }
 
+  // ---- data load ---------------------------------------------------
   async function init(){
-    applyTheme(currentTheme);
     applyLangUI();
-    checkSeasonReset();
     updateStreak();
-    // 初回起動時は初期ポイントをセット
-    if(localStorage.getItem('buzzshorts_points') === null){
-      setPoints(INITIAL_POINTS);
-    }
-    grantDailyBonus();
-    updatePointsUI();
-    checkBankruptcy();
 
     try{
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
-      const res = await fetch('data/shorts.json', {cache:'no-store', signal: controller.signal}).finally(() => clearTimeout(timeout));
-      if(!res.ok) throw new Error('fetch failed: ' + res.status);
+      const res = await fetch('data/shorts.json', {cache:'no-store'});
+      if(!res.ok) throw new Error('fetch failed');
       const json = await res.json();
-      if(!Array.isArray(json.videos)) throw new Error('invalid format');
       allVideos = json.videos || [];
-      if(allVideos.length === 0) throw new Error('no videos');
       if(json.generatedAt){
         const d = new Date(json.generatedAt);
         updatedAtEl.textContent = t('updated', d.toLocaleString(LANG === 'ja' ? 'ja-JP' : 'en-US', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}));
       }
     }catch(err){
-      console.error('Data fetch failed:', err.message);
       allVideos = [];
-      showToast('データ読みこみに失敗しました');
     }
     checkResolutions();
     loadingStatus.classList.add('hidden');
     renderTabs();
     renderFeed();
 
+    // 初回訪問ならジャンル設定モーダルを開く
     if(!localStorage.getItem('buzzshorts_onboarded')){
       setTimeout(openGenreModal, 500);
     }
-
-    setInterval(() => {
-      let pending = 0;
-      Object.entries(predictions).forEach(([id, p]) => {
-        if(!p.judged) pending++;
-      });
-      updateAppBadge(pending);
-    }, 60000);
   }
 
   init();

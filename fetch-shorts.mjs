@@ -2,31 +2,15 @@
 /**
  * fetch-shorts.mjs
  * ------------------------------------------------------------
- * YouTube Data API v3 を使って「登録者数に対して再生数が
- * 異常に伸びているShorts」を集め、data/shorts.json を生成する。
+ * YouTube Data API v3 — 日本（JP）特化の急上昇Shorts収集
+ * data/shorts.json を生成（50〜100本規模）
  *
  * 使い方:
  *   YOUTUBE_API_KEY=xxxxx node fetch-shorts.mjs
- *
- * 必要な環境変数:
- *   YOUTUBE_API_KEY  ... YouTube Data API v3 のAPIキー（必須）
- *
- * 任意の環境変数:
- *   LOOKBACK_HOURS     ... 何時間以内に投稿された動画を対象にするか（デフォルト24）
- *   MAX_PER_GENRE      ... 各ジャンルから残す件数（デフォルト15）
- *   MIN_SUBSCRIBERS    ... 対象にするチャンネルの最低登録者数（デフォルト1000）
- *                          無名すぎるチャンネル（登録者数人〜数十人）をノイズとして除外する
- *   MIN_VIEW_COUNT     ... 対象にする動画の最低再生数（デフォルト1000）
- *                          再生数が極端に少ない動画は急上昇率が偶然高くなりやすいため除外する
- *
- * クォータの目安:
- *   search.list は1回100ユニット消費。ジャンル×検索語の数だけ
- *   呼び出すので、本設定（10ジャンル×1検索語）だと約1,000ユニット/回。
- *   1日10,000ユニットの無料枠内なら、1日数回の実行が可能。
  * ------------------------------------------------------------
  */
 
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
@@ -36,68 +20,134 @@ if (!API_KEY) {
 }
 
 const LOOKBACK_HOURS = Number(process.env.LOOKBACK_HOURS || 24);
-const MAX_PER_GENRE = Number(process.env.MAX_PER_GENRE || 15);
-const MIN_SUBSCRIBERS = Number(process.env.MIN_SUBSCRIBERS || 1000);
-const MIN_VIEW_COUNT = Number(process.env.MIN_VIEW_COUNT || 1000);
-const REGION_CODE = 'JP';
+const MAX_PER_GENRE = Number(process.env.MAX_PER_GENRE || 8);
+const MIN_SUBSCRIBERS = Number(process.env.MIN_SUBSCRIBERS || 50);
+const MIN_VIEW_COUNT = Number(process.env.MIN_VIEW_COUNT || 500);
 const OUTPUT_PATH = path.resolve(process.cwd(), 'data', 'shorts.json');
 
-// ジャンルごとの検索キーワードと、タイトル/説明文に含まれているべき
-// チェック用キーワード（誤分類を防ぐための二重チェック）。
-// matchKeywords のうち1つでもタイトル or 説明文に含まれていればそのジャンルと判定する。
+// 日本（JP）特化 — 全ジャンル regionCode: JP / 日本語限定
 const GENRES = [
-  {
-    id: 'game', query: 'ゲーム実況 #shorts',
-    matchKeywords: ['ゲーム', 'プレイ', '実況', 'クリア', 'ボス', 'RTA', 'eスポーツ'],
-  },
-  {
-    id: 'cooking', query: '簡単レシピ #shorts',
-    matchKeywords: ['レシピ', '料理', '作り方', 'クッキング', 'ごはん', '飯', '食材', 'おかず'],
-  },
-  {
-    id: 'pets', query: '犬 猫 #shorts',
-    matchKeywords: ['犬', '猫', 'ねこ', 'いぬ', 'ペット', '動物', 'わんこ', 'にゃんこ'],
-  },
-  {
-    id: 'comedy', query: 'あるある #shorts',
-    matchKeywords: ['あるある', '笑', 'コント', 'ネタ', 'ボケ', 'ツッコミ', 'お笑い'],
-  },
-  {
-    id: 'beauty', query: 'メイク 美容 #shorts',
-    matchKeywords: ['メイク', '美容', 'コスメ', 'スキンケア', 'ヘアアレンジ', '化粧'],
-  },
-  {
-    id: 'music', query: '弾いてみた 歌ってみた #shorts',
-    matchKeywords: ['弾いてみた', '歌ってみた', 'カバー', 'ギター', 'ピアノ', '演奏', '作曲', 'Cover'],
-  },
-  {
-    id: 'sports', query: 'スポーツ 筋トレ #shorts',
-    matchKeywords: ['サッカー', '野球', 'バスケ', 'スポーツ', '筋トレ', 'トレーニング', 'リフティング'],
-  },
-  {
-    id: 'talk', query: '雑談 あるある話 #shorts',
-    matchKeywords: ['雑談', '話', 'トーク', '相談', 'エピソード'],
-  },
+  { id: 'game', query: 'ゲーム実況 #shorts',
+    matchKeywords: ['ゲーム', 'プレイ', '実況', 'クリア', 'ボス', 'RTA', 'eスポーツ', 'minecraft', 'マイクラ'] },
+  { id: 'cooking', query: '簡単レシピ #shorts',
+    matchKeywords: ['レシピ', '料理', '作り方', 'クッキング', 'ごはん', '飯', '食材', 'おかず'] },
+  { id: 'pets', query: '犬 猫 動物 #shorts',
+    matchKeywords: ['犬', '猫', 'ねこ', 'いぬ', 'ペット', '動物', 'わんこ', 'にゃんこ', '鳥', 'うさぎ'] },
+  { id: 'comedy', query: 'あるある #shorts',
+    matchKeywords: ['あるある', '笑', 'コント', 'ネタ', 'ボケ', 'ツッコミ', 'お笑い'] },
+  { id: 'beauty', query: 'メイク 美容 #shorts',
+    matchKeywords: ['メイク', '美容', 'コスメ', 'スキンケア', 'ヘアアレンジ', '化粧'] },
+  { id: 'music', query: '弾いてみた 歌ってみた #shorts',
+    matchKeywords: ['弾いてみた', '歌ってみた', 'カバー', 'ギター', 'ピアノ', '演奏', '作曲', 'Cover'] },
+  { id: 'sports', query: 'スポーツ 筋トレ #shorts',
+    matchKeywords: ['サッカー', '野球', 'バスケ', 'スポーツ', '筋トレ', 'トレーニング', 'リフティング'] },
+  { id: 'talk', query: '雑談 あるある話 #shorts',
+    matchKeywords: ['雑談', '話', 'トーク', '相談', 'エピソード'] },
+  { id: 'trivia', query: '雑学 豆知識 #shorts',
+    matchKeywords: ['雑学', '豆知識', 'トリビア', '知識', 'なぜ', '意外'] },
+  { id: 'asmr', query: 'ASMR #shorts',
+    matchKeywords: ['ASMR', '咀嚼音', '耳かき', '癒し', '睡眠', 'satisfying'] },
+  { id: 'diy', query: 'ライフハック 便利グッズ #shorts',
+    matchKeywords: ['ライフハック', '便利グッズ', '裏技', 'DIY', '収納', '時短'] },
 ];
 
-const SEARCH_RESULTS_PER_GENRE = 25;
+const SEARCH_RESULTS_PER_GENRE = Number(process.env.SEARCH_RESULTS_PER_GENRE || 100);
+const PREDICT_CHECK_HOURS = Number(process.env.PREDICT_CHECK_HOURS || 6);
+const PREDICT_PENDING_MAX_HOURS = 18;
 
-// 日本語（ひらがな・カタカナ・漢字）の文字が含まれているかを判定する。
-// 海外勢の動画やローマ字のみのタイトルを弾くための簡易フィルタ。
-function containsJapanese(text){
+const BUZZ_KEYWORD_PATTERNS = [
+  'あるある', '雑学', '豆知識', '裏技', 'ライフハック', 'ASMR', '料理', 'レシピ',
+  'ゲーム', '実況', '猫', '犬', 'ペット', 'メイク', '美容', '筋トレ', 'スポーツ',
+  '歌ってみた', '弾いてみた', 'マイクラ', 'minecraft', 'トレンド', 'バズ', '神回',
+];
+
+const EDIT_TEMPLATE_RULES = [
+  { tag: '高速カット系', patterns: ['#shorts', '切り抜き', 'ハイライト', 'まとめ', '秒'] },
+  { tag: 'テキスト読み上げ系', patterns: ['雑学', '豆知識', 'ナレーション', '解説', 'トリビア'] },
+  { tag: 'リアクション系', patterns: ['あるある', '反応', 'リアクション', 'びっくり', '驚'] },
+  { tag: 'How-to系', patterns: ['作り方', 'やり方', '方法', 'レシピ', 'DIY', '裏技'] },
+  { tag: 'BGMダンス系', patterns: ['ダンス', '踊', 'チャレンジ', 'トレンド', '音源'] },
+];
+
+const AUDIO_HINT_PATTERNS = [
+  { name: 'オリジナル音源', patterns: ['オリジナル', '自作'] },
+  { name: 'トレンド音源', patterns: ['トレンド', '流行', 'バズ'] },
+  { name: 'ASMR音', patterns: ['ASMR', '咀嚼', '耳かき'] },
+  { name: 'カバー曲', patterns: ['歌ってみた', 'カバー', '弾いてみた'] },
+  { name: '効果音メイン', patterns: ['効果音', 'SE', 'ドン'] },
+];
+
+function resolveTier(ratio) {
+  if (ratio >= 3) return 'blast';
+  if (ratio >= 1.2) return 'normal';
+  return 'slow';
+}
+
+async function readPreviousOutput() {
+  try {
+    const raw = await readFile(OUTPUT_PATH, 'utf-8');
+    const json = JSON.parse(raw);
+    const map = new Map();
+    for (const v of json.videos || []) map.set(v.id, v);
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+function containsJapanese(text) {
   return /[\u3040-\u30FF\u4E00-\u9FFF]/.test(text || '');
 }
 
-// タイトル・説明文にジャンルのキーワードが実際に含まれているか確認する。
-// 検索結果には関連度の低い動画も混じるため、ここで二重チェックする。
-function matchesGenre(genre, title, description){
-  const text = `${title} ${description}`;
-  return genre.matchKeywords.some(kw => text.includes(kw));
+function matchesKeywords(keywords, title, description) {
+  const text = `${title} ${description}`.toLowerCase();
+  return keywords.some(kw => text.includes(kw.toLowerCase()));
 }
 
-// ---------------------------------------------------------------
-// ヘルパー
-// ---------------------------------------------------------------
+function extractBuzzKeywords(title) {
+  const found = new Set();
+  const hashtags = (title.match(/#[\w\u3040-\u30FF\u4E00-\u9FFF]+/g) || []);
+  hashtags.forEach(h => found.add(h));
+  for (const kw of BUZZ_KEYWORD_PATTERNS) {
+    if (title.includes(kw)) found.add(kw.startsWith('#') ? kw : `#${kw}`);
+  }
+  return [...found].slice(0, 6);
+}
+
+function guessEditTemplate(title) {
+  const tags = [];
+  for (const rule of EDIT_TEMPLATE_RULES) {
+    if (rule.patterns.some(p => title.includes(p))) tags.push(rule.tag);
+  }
+  return tags.length ? tags : ['ショート汎用型'];
+}
+
+function guessAudioHint(title) {
+  for (const rule of AUDIO_HINT_PATTERNS) {
+    if (rule.patterns.some(p => title.includes(p))) return rule.name;
+  }
+  return '不明音源';
+}
+
+function estimateEngagementGrade(likeCount, commentCount, viewCount) {
+  if (!viewCount) return 'B';
+  const likeRate = likeCount / viewCount;
+  const commentRate = commentCount / viewCount;
+  const score = likeRate * 100 + commentRate * 500;
+  if (score >= 8) return 'AA';
+  if (score >= 4) return 'A';
+  return 'B';
+}
+
+function estimateAvgViews(subscriberCount) {
+  return Math.max(100, Math.round(subscriberCount * 0.08));
+}
+
+function isGenreMatch(title, genreId) {
+  const genre = GENRES.find(g => g.id === genreId);
+  if (!genre) return true;
+  return matchesKeywords(genre.matchKeywords, title, '');
+}
 
 async function callApi(endpoint, params) {
   const url = new URL(`https://www.googleapis.com/youtube/v3/${endpoint}`);
@@ -112,7 +162,6 @@ async function callApi(endpoint, params) {
   return res.json();
 }
 
-// "PT45S" / "PT1M5S" のようなISO8601の時間表現を秒数に変換する
 function parseISODuration(iso) {
   const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!match) return 0;
@@ -126,16 +175,10 @@ function chunk(arr, size) {
   return out;
 }
 
-// ---------------------------------------------------------------
-// メイン処理
-// ---------------------------------------------------------------
-
 async function main() {
   const publishedAfter = new Date(Date.now() - LOOKBACK_HOURS * 3600 * 1000).toISOString();
-  console.log(`対象期間: ${publishedAfter} 以降に投稿された動画`);
+  console.log(`対象期間: ${publishedAfter} 以降（JP特化）`);
 
-  // 1) ジャンルごとに search.list でShorts候補を取得
-  // videoId -> genre のマップ（同じ動画が複数ジャンルにマッチしたら最初のジャンルを優先）
   const videoGenreMap = new Map();
 
   for (const genre of GENRES) {
@@ -145,9 +188,9 @@ async function main() {
         type: 'video',
         q: genre.query,
         order: 'viewCount',
-        videoDuration: 'short', // 4分未満（後でShorts判定をさらに絞る）
+        videoDuration: 'short',
         publishedAfter,
-        regionCode: REGION_CODE,
+        regionCode: 'JP',
         relevanceLanguage: 'ja',
         maxResults: SEARCH_RESULTS_PER_GENRE,
         safeSearch: 'moderate',
@@ -159,21 +202,33 @@ async function main() {
         const title = item.snippet?.title || '';
         const description = item.snippet?.description || '';
         if (!id || videoGenreMap.has(id)) continue;
-
-        // 日本語が含まれていない動画（海外勢など）はここで除外
         if (!containsJapanese(title)) continue;
-
-        // タイトル/説明文にジャンルキーワードが含まれているかチェック
-        // （検索結果には関連度の低い動画も混じるため）
-        if (!matchesGenre(genre, title, description)) continue;
+        if (!matchesKeywords(genre.matchKeywords, title, description)) continue;
 
         videoGenreMap.set(id, genre.id);
         matched++;
       }
-      console.log(`[${genre.id}] ${data.items?.length || 0} 件取得 → ジャンル一致 ${matched} 件`);
+      console.log(`[${genre.id}/JP] ${data.items?.length || 0} 件取得 → ジャンル一致 ${matched} 件`);
     } catch (err) {
-      console.error(`[${genre.id}] 検索に失敗: ${err.message}`);
+      console.error(`[${genre.id}/JP] 検索に失敗: ${err.message}`);
     }
+  }
+
+  const prevMap = await readPreviousOutput();
+  const now = Date.now();
+  const nowISO = new Date(now).toISOString();
+  let pendingCarried = 0;
+  for (const [id, prev] of prevMap) {
+    if (videoGenreMap.has(id)) continue;
+    if (prev.resolvedAt) continue;
+    const firstSeenMs = new Date(prev.firstSeenAt || prev.publishedAt).getTime();
+    const ageHours = (now - firstSeenMs) / 3600000;
+    if (ageHours > PREDICT_PENDING_MAX_HOURS) continue;
+    videoGenreMap.set(id, prev.genre);
+    pendingCarried++;
+  }
+  if (pendingCarried > 0) {
+    console.log(`答え合わせ待ちのため ${pendingCarried} 件を追加で再取得します。`);
   }
 
   const videoIds = [...videoGenreMap.keys()];
@@ -183,7 +238,6 @@ async function main() {
     return;
   }
 
-  // 2) videos.list で詳細情報（統計・動画の長さ）を取得
   const videoDetails = [];
   for (const idsChunk of chunk(videoIds, 50)) {
     const data = await callApi('videos', {
@@ -193,14 +247,12 @@ async function main() {
     videoDetails.push(...(data.items || []));
   }
 
-  // 3) 60秒以下の動画だけをShortsとして残す
   const shorts = videoDetails.filter(v => {
     const seconds = parseISODuration(v.contentDetails?.duration || 'PT0S');
     return seconds > 0 && seconds <= 60;
   });
   console.log(`Shorts判定（60秒以下）: ${shorts.length} / ${videoDetails.length} 件`);
 
-  // 4) チャンネルの登録者数を取得
   const channelIds = [...new Set(shorts.map(v => v.snippet.channelId))];
   const subscriberMap = new Map();
   for (const idsChunk of chunk(channelIds, 50)) {
@@ -210,65 +262,113 @@ async function main() {
     });
     for (const item of data.items || []) {
       const subs = item.statistics?.subscriberCount;
-      // 登録者数を非公開にしているチャンネルは hiddenSubscriberCount が true
       subscriberMap.set(item.id, subs ? Number(subs) : null);
     }
   }
 
-  // 5) 急上昇率（再生数 ÷ 登録者数）を計算して整形
   const videos = shorts
     .map(v => {
       const viewCount = Number(v.statistics?.viewCount || 0);
+      const likeCount = Number(v.statistics?.likeCount || 0);
+      const commentCount = Number(v.statistics?.commentCount || 0);
       const subscriberCount = subscriberMap.get(v.snippet.channelId);
+      const durationSeconds = parseISODuration(v.contentDetails?.duration || 'PT0S');
+      const title = v.snippet.title;
 
-      // 登録者数が非公開・取得不可の動画は急上昇率を計算できないため除外
       if (subscriberCount === null || subscriberCount === undefined) return null;
-
-      // 登録者数・再生数が一定の規模に満たないチャンネル/動画は
-      // 「たまたま」の確率が高くノイズになりやすいため除外する
       if (subscriberCount < MIN_SUBSCRIBERS) return null;
       if (viewCount < MIN_VIEW_COUNT) return null;
 
       const growthRatio = Math.round(viewCount / Math.max(subscriberCount, 1));
+      const spikeRatio = Number((viewCount / Math.max(subscriberCount, 1)).toFixed(2));
+      const estimatedAvgViews = estimateAvgViews(subscriberCount);
+      const avgGapMultiplier = Number((viewCount / Math.max(estimatedAvgViews, 1)).toFixed(1));
+
+      const prev = prevMap.get(v.id);
+      const firstSeenAt = prev?.firstSeenAt || nowISO;
+      const firstSeenViewCount = prev?.firstSeenViewCount ?? viewCount;
+      let resolvedTier = prev?.resolvedTier ?? null;
+      let resolvedAt = prev?.resolvedAt ?? null;
+      let sixHourGrowthRatio = prev?.sixHourGrowthRatio ?? null;
+
+      if (!resolvedAt) {
+        const ageHours = (now - new Date(firstSeenAt).getTime()) / 3600000;
+        if (ageHours >= PREDICT_CHECK_HOURS) {
+          const ratio = viewCount / Math.max(firstSeenViewCount, 1);
+          resolvedTier = resolveTier(ratio);
+          resolvedAt = nowISO;
+          sixHourGrowthRatio = Number(ratio.toFixed(2));
+        }
+      }
+
+      const genre = videoGenreMap.get(v.id) || 'other';
+      const genreMatch = isGenreMatch(title, genre);
 
       return {
         id: v.id,
-        title: v.snippet.title,
+        title,
         channelTitle: v.snippet.channelTitle,
         channelId: v.snippet.channelId,
-        genre: videoGenreMap.get(v.id) || 'other',
+        genre,
+        sourceLang: 'ja',
         publishedAt: v.snippet.publishedAt,
         viewCount,
+        likeCount,
+        commentCount,
         subscriberCount,
         growthRatio,
+        spikeRatio,
+        durationSeconds,
+        estimatedAvgViews,
+        avgGapMultiplier,
+        buzzKeywords: extractBuzzKeywords(title),
+        editTemplates: guessEditTemplate(title),
+        audioHint: guessAudioHint(title),
+        engagementGrade: estimateEngagementGrade(likeCount, commentCount, viewCount),
+        genreSpecialization: genreMatch ? 'same-genre' : 'cross-buzz',
+        firstSeenAt,
+        firstSeenViewCount,
+        predictCheckHours: PREDICT_CHECK_HOURS,
+        resolvedTier,
+        resolvedAt,
+        sixHourGrowthRatio,
         thumbnail: v.snippet.thumbnails?.high?.url || v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url,
       };
     })
     .filter(Boolean);
 
-  console.log(`登録者数${MIN_SUBSCRIBERS}人以上・再生数${MIN_VIEW_COUNT}回以上でフィルタ後: ${videos.length} 件`);
+  console.log(`フィルタ後: ${videos.length} 件`);
 
-  // 6) ジャンルごとに急上昇率が高い順に並べ、上位だけ残す
   const byGenre = new Map();
   for (const v of videos) {
     if (!byGenre.has(v.genre)) byGenre.set(v.genre, []);
     byGenre.get(v.genre).push(v);
   }
   let trimmed = [];
+  const trimmedIds = new Set();
   for (const list of byGenre.values()) {
     list.sort((a, b) => b.growthRatio - a.growthRatio);
-    trimmed.push(...list.slice(0, MAX_PER_GENRE));
+    const kept = list.slice(0, MAX_PER_GENRE);
+    kept.forEach(v => trimmedIds.add(v.id));
+    trimmed.push(...kept);
   }
-  trimmed.sort((a, b) => b.growthRatio - a.growthRatio);
 
-  console.log(`最終的に ${trimmed.length} 件を出力します。`);
-  await writeOutput(trimmed);
+  const pendingOnly = videos
+    .filter(v => !trimmedIds.has(v.id) && !v.resolvedAt)
+    .map(v => ({ ...v, predictionOnly: true }));
+
+  const output = [...trimmed, ...pendingOnly];
+  output.sort((a, b) => b.growthRatio - a.growthRatio);
+
+  console.log(`最終出力: フィード ${trimmed.length} 件 + 答え合わせ待ち ${pendingOnly.length} 件 = 合計 ${output.length} 件`);
+  await writeOutput(output);
 }
 
 async function writeOutput(videos) {
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   const json = {
     generatedAt: new Date().toISOString(),
+    region: 'JP',
     videos,
   };
   await writeFile(OUTPUT_PATH, JSON.stringify(json, null, 2), 'utf-8');

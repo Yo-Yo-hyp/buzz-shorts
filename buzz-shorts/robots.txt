@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yo-yo-hyp.github.io/buzz-shorts/sitemap.xml

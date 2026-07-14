@@ -3,7 +3,7 @@
 // アイコンなど滅多に変わらない静的ファイルだけキャッシュ優先にする。
 // data(shorts.json)は引き続きネット優先。
 
-const CACHE_NAME = 'buzzshorts-v4'; // 更新のたびにこの番号を上げると、古いキャッシュを確実に破棄できる
+const CACHE_NAME = 'buzzshorts-v3'; // 更新のたびにこの番号を上げると、古いキャッシュを確実に破棄できる
 const SHELL_FILES = [
   './manifest.json',
   './icons/icon-192.png',
