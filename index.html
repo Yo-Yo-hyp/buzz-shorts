@@ -1062,7 +1062,7 @@
   const BANKRUPTCY_VIDEOS_NEEDED = 3;
   const CONTRARIAN_BONUS = 25;
   const BET_AMOUNTS = [5, 10, 20, 50];
-  const TIER_ODDS = { blast: 2.5, normal: 1.8, slow: 3.5 };
+  const TIER_ODDS = { over: 1.9, under: 1.9 };
   const TIER_BOUNDARIES = { slowMax: 1.2, blastMin: 3 };
 
   const THEMES = {
@@ -1083,9 +1083,8 @@
   ];
 
   const PREDICT_TIERS = [
-    {id:'blast',  ja:'🔥爆伸び',   en:'🔥Blast',  short:{ja:'爆伸び', en:'Blast'}},
-    {id:'normal', ja:'📈普通',     en:'📈Normal', short:{ja:'普通',   en:'Normal'}},
-    {id:'slow',   ja:'😐伸び悩み', en:'😐Slow',   short:{ja:'伸び悩み', en:'Slow'}},
+    {id:'over',  ja:'📈 高評価Over',    en:'📈 Like Over',  short:{ja:'Over', en:'Over'}},
+    {id:'under', ja:'📉 高評価Under', en:'📉 Like Under', short:{ja:'Under', en:'Under'}},
   ];
   // 自信度は廃止しポイントベット方式に移行（後方互換のため残す）
   const CONFIDENCE_LEVELS = [

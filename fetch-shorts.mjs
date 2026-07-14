@@ -25,35 +25,35 @@ const MIN_SUBSCRIBERS = Number(process.env.MIN_SUBSCRIBERS || 50);
 const MIN_VIEW_COUNT = Number(process.env.MIN_VIEW_COUNT || 500);
 const OUTPUT_PATH = path.resolve(process.cwd(), 'data', 'shorts.json');
 
-// 日本（JP）特化 — 全ジャンル regionCode: JP / 日本語限定
+// 日本（JP）特化 — 全ジャンル regionCode: JP / 日本語限定（#shorts を除去、日本特有コンテンツ重視）
 const GENRES = [
-  { id: 'game', query: 'ゲーム実況 #shorts',
+  { id: 'game', query: 'ゲーム実況',
     matchKeywords: ['ゲーム', 'プレイ', '実況', 'クリア', 'ボス', 'RTA', 'eスポーツ', 'minecraft', 'マイクラ'] },
-  { id: 'cooking', query: '簡単レシピ #shorts',
+  { id: 'cooking', query: '料理 レシピ',
     matchKeywords: ['レシピ', '料理', '作り方', 'クッキング', 'ごはん', '飯', '食材', 'おかず'] },
-  { id: 'pets', query: '犬 猫 動物 #shorts',
+  { id: 'pets', query: '犬 猫 動物',
     matchKeywords: ['犬', '猫', 'ねこ', 'いぬ', 'ペット', '動物', 'わんこ', 'にゃんこ', '鳥', 'うさぎ'] },
-  { id: 'comedy', query: 'あるある #shorts',
+  { id: 'comedy', query: 'あるある',
     matchKeywords: ['あるある', '笑', 'コント', 'ネタ', 'ボケ', 'ツッコミ', 'お笑い'] },
-  { id: 'beauty', query: 'メイク 美容 #shorts',
+  { id: 'beauty', query: 'メイク 美容',
     matchKeywords: ['メイク', '美容', 'コスメ', 'スキンケア', 'ヘアアレンジ', '化粧'] },
-  { id: 'music', query: '弾いてみた 歌ってみた #shorts',
+  { id: 'music', query: '弾いてみた 歌ってみた',
     matchKeywords: ['弾いてみた', '歌ってみた', 'カバー', 'ギター', 'ピアノ', '演奏', '作曲', 'Cover'] },
-  { id: 'sports', query: 'スポーツ 筋トレ #shorts',
+  { id: 'sports', query: 'スポーツ 筋トレ',
     matchKeywords: ['サッカー', '野球', 'バスケ', 'スポーツ', '筋トレ', 'トレーニング', 'リフティング'] },
-  { id: 'talk', query: '雑談 あるある話 #shorts',
+  { id: 'talk', query: '雑談 トーク',
     matchKeywords: ['雑談', '話', 'トーク', '相談', 'エピソード'] },
-  { id: 'trivia', query: '雑学 豆知識 #shorts',
-    matchKeywords: ['雑学', '豆知識', 'トリビア', '知識', 'なぜ', '意外'] },
-  { id: 'asmr', query: 'ASMR #shorts',
+  { id: 'trivia', query: '雑学 豆知識 解説',
+    matchKeywords: ['雑学', '豆知識', 'トリビア', '知識', 'なぜ', '意外', '解説'] },
+  { id: 'asmr', query: 'ASMR 癒し',
     matchKeywords: ['ASMR', '咀嚼音', '耳かき', '癒し', '睡眠', 'satisfying'] },
-  { id: 'diy', query: 'ライフハック 便利グッズ #shorts',
-    matchKeywords: ['ライフハック', '便利グッズ', '裏技', 'DIY', '収納', '時短'] },
+  { id: 'diy', query: 'ライフハック 検証',
+    matchKeywords: ['ライフハック', '便利グッズ', '裏技', 'DIY', '収納', '時短', '検証', 'テスト'] },
 ];
 
 const SEARCH_RESULTS_PER_GENRE = Number(process.env.SEARCH_RESULTS_PER_GENRE || 100);
-const PREDICT_CHECK_HOURS = Number(process.env.PREDICT_CHECK_HOURS || 6);
-const PREDICT_PENDING_MAX_HOURS = 18;
+const PREDICT_CHECK_HOURS = Number(process.env.PREDICT_CHECK_HOURS || 3); // Like予想は3時間後
+const PREDICT_PENDING_MAX_HOURS = 9;
 
 const BUZZ_KEYWORD_PATTERNS = [
   'あるある', '雑学', '豆知識', '裏技', 'ライフハック', 'ASMR', '料理', 'レシピ',
@@ -77,10 +77,9 @@ const AUDIO_HINT_PATTERNS = [
   { name: '効果音メイン', patterns: ['効果音', 'SE', 'ドン'] },
 ];
 
-function resolveTier(ratio) {
-  if (ratio >= 3) return 'blast';
-  if (ratio >= 1.2) return 'normal';
-  return 'slow';
+// Like Over/Under予想: 目標倍値(現在何 x 1.2)を超えるか
+function resolveTier(likeMultiplier) {
+  return likeMultiplier >= 1.2 ? 'over' : 'under';
 }
 
 async function readPreviousOutput() {
@@ -95,8 +94,10 @@ async function readPreviousOutput() {
   }
 }
 
+// Japanese character detection: requires at least 3 hiragana/katakana/kanji characters
 function containsJapanese(text) {
-  return /[\u3040-\u30FF\u4E00-\u9FFF]/.test(text || '');
+  const matches = (text || '').match(/[ぁ-んァ-ヶ]/g);
+  return matches && matches.length >= 3;
 }
 
 function matchesKeywords(keywords, title, description) {
@@ -266,6 +267,8 @@ async function main() {
     }
   }
 
+  const MIN_LIKE_COUNT = 50; // filter out low-like videos
+
   const videos = shorts
     .map(v => {
       const viewCount = Number(v.statistics?.viewCount || 0);
@@ -278,6 +281,7 @@ async function main() {
       if (subscriberCount === null || subscriberCount === undefined) return null;
       if (subscriberCount < MIN_SUBSCRIBERS) return null;
       if (viewCount < MIN_VIEW_COUNT) return null;
+      if (likeCount < MIN_LIKE_COUNT) return null;
 
       const growthRatio = Math.round(viewCount / Math.max(subscriberCount, 1));
       const spikeRatio = Number((viewCount / Math.max(subscriberCount, 1)).toFixed(2));
@@ -287,17 +291,20 @@ async function main() {
       const prev = prevMap.get(v.id);
       const firstSeenAt = prev?.firstSeenAt || nowISO;
       const firstSeenViewCount = prev?.firstSeenViewCount ?? viewCount;
+      const firstSeenLikeCount = prev?.firstSeenLikeCount ?? likeCount;
       let resolvedTier = prev?.resolvedTier ?? null;
       let resolvedAt = prev?.resolvedAt ?? null;
       let sixHourGrowthRatio = prev?.sixHourGrowthRatio ?? null;
+      let threeHourLikeMultiplier = prev?.threeHourLikeMultiplier ?? null;
 
       if (!resolvedAt) {
         const ageHours = (now - new Date(firstSeenAt).getTime()) / 3600000;
         if (ageHours >= PREDICT_CHECK_HOURS) {
-          const ratio = viewCount / Math.max(firstSeenViewCount, 1);
-          resolvedTier = resolveTier(ratio);
+          const likeMultiplier = likeCount / Math.max(firstSeenLikeCount, 1);
+          resolvedTier = resolveTier(likeMultiplier);
           resolvedAt = nowISO;
-          sixHourGrowthRatio = Number(ratio.toFixed(2));
+          sixHourGrowthRatio = Number(likeMultiplier.toFixed(2));
+          threeHourLikeMultiplier = Number(likeMultiplier.toFixed(2));
         }
       }
 
@@ -328,10 +335,12 @@ async function main() {
         genreSpecialization: genreMatch ? 'same-genre' : 'cross-buzz',
         firstSeenAt,
         firstSeenViewCount,
+        firstSeenLikeCount,
         predictCheckHours: PREDICT_CHECK_HOURS,
         resolvedTier,
         resolvedAt,
         sixHourGrowthRatio,
+        threeHourLikeMultiplier,
         thumbnail: v.snippet.thumbnails?.high?.url || v.snippet.thumbnails?.medium?.url || v.snippet.thumbnails?.default?.url,
       };
     })
