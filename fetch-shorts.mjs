@@ -20,9 +20,11 @@ if (!API_KEY) {
 }
 
 const LOOKBACK_HOURS = Number(process.env.LOOKBACK_HOURS || 24);
-const MAX_PER_GENRE = Number(process.env.MAX_PER_GENRE || 8);
+const MAX_PER_GENRE = Number(process.env.MAX_PER_GENRE || 10);
+const MAX_TOTAL_VIDEOS = Number(process.env.MAX_TOTAL_VIDEOS || 100);
 const MIN_SUBSCRIBERS = Number(process.env.MIN_SUBSCRIBERS || 50);
 const MIN_VIEW_COUNT = Number(process.env.MIN_VIEW_COUNT || 500);
+const MIN_LIKE_COUNT = Number(process.env.MIN_LIKE_COUNT || 100);
 const OUTPUT_PATH = path.resolve(process.cwd(), 'data', 'shorts.json');
 
 // 日本（JP）特化 — 全ジャンル regionCode: JP / 日本語限定（#shorts を除去、日本特有コンテンツ重視）
@@ -51,7 +53,7 @@ const GENRES = [
     matchKeywords: ['ライフハック', '便利グッズ', '裏技', 'DIY', '収納', '時短', '検証', 'テスト'] },
 ];
 
-const SEARCH_RESULTS_PER_GENRE = Number(process.env.SEARCH_RESULTS_PER_GENRE || 100);
+const SEARCH_RESULTS_PER_GENRE = Math.max(50, Math.min(100, Number(process.env.SEARCH_RESULTS_PER_GENRE || 100)));
 const PREDICT_CHECK_HOURS = Number(process.env.PREDICT_CHECK_HOURS || 3); // Like予想は3時間後
 const PREDICT_PENDING_MAX_HOURS = 9;
 
@@ -94,10 +96,13 @@ async function readPreviousOutput() {
   }
 }
 
-// Japanese character detection: requires at least 3 hiragana/katakana/kanji characters
+// Japanese character detection: requires at least 1 hiragana/katakana/kanji character
 function containsJapanese(text) {
-  const matches = (text || '').match(/[ぁ-んァ-ヶ]/g);
-  return matches && matches.length >= 3;
+  return /[ぁ-んァ-ヶ一-龠]/.test(text || '');
+}
+
+function isEmbeddableVideo(video) {
+  return video?.status?.embeddable === true && video?.status?.privacyStatus === 'public';
 }
 
 function matchesKeywords(keywords, title, description) {
@@ -144,10 +149,10 @@ function estimateAvgViews(subscriberCount) {
   return Math.max(100, Math.round(subscriberCount * 0.08));
 }
 
-function isGenreMatch(title, genreId) {
+function isGenreMatch(text, genreId) {
   const genre = GENRES.find(g => g.id === genreId);
   if (!genre) return true;
-  return matchesKeywords(genre.matchKeywords, title, '');
+  return matchesKeywords(genre.matchKeywords, text, '');
 }
 
 async function callApi(endpoint, params) {
@@ -176,6 +181,46 @@ function chunk(arr, size) {
   return out;
 }
 
+async function searchGenreCandidates(genre, publishedAfter) {
+  const collected = [];
+  const seenIds = new Set();
+  const maxResults = Math.min(50, SEARCH_RESULTS_PER_GENRE);
+  let pageToken;
+
+  while (collected.length < SEARCH_RESULTS_PER_GENRE) {
+    const data = await callApi('search', {
+      part: 'snippet',
+      type: 'video',
+      q: genre.query,
+      order: 'viewCount',
+      videoDuration: 'short',
+      publishedAfter,
+      regionCode: 'JP',
+      relevanceLanguage: 'ja',
+      maxResults,
+      safeSearch: 'moderate',
+      pageToken,
+    });
+
+    for (const item of data.items || []) {
+      const id = item.id?.videoId;
+      if (!id || seenIds.has(id)) continue;
+      const title = item.snippet?.title || '';
+      const description = item.snippet?.description || '';
+      const combined = `${title} ${description}`;
+      if (!containsJapanese(combined)) continue;
+      if (!matchesKeywords(genre.matchKeywords, title, description)) continue;
+      seenIds.add(id);
+      collected.push(item);
+    }
+
+    pageToken = data.nextPageToken;
+    if (!pageToken) break;
+  }
+
+  return collected;
+}
+
 async function main() {
   const publishedAfter = new Date(Date.now() - LOOKBACK_HOURS * 3600 * 1000).toISOString();
   console.log(`対象期間: ${publishedAfter} 以降（JP特化）`);
@@ -184,32 +229,20 @@ async function main() {
 
   for (const genre of GENRES) {
     try {
-      const data = await callApi('search', {
-        part: 'snippet',
-        type: 'video',
-        q: genre.query,
-        order: 'viewCount',
-        videoDuration: 'short',
-        publishedAfter,
-        regionCode: 'JP',
-        relevanceLanguage: 'ja',
-        maxResults: SEARCH_RESULTS_PER_GENRE,
-        safeSearch: 'moderate',
-      });
-
+      const items = await searchGenreCandidates(genre, publishedAfter);
       let matched = 0;
-      for (const item of data.items || []) {
+      for (const item of items) {
         const id = item.id?.videoId;
         const title = item.snippet?.title || '';
         const description = item.snippet?.description || '';
         if (!id || videoGenreMap.has(id)) continue;
-        if (!containsJapanese(title)) continue;
+        if (!containsJapanese(`${title} ${description}`)) continue;
         if (!matchesKeywords(genre.matchKeywords, title, description)) continue;
 
         videoGenreMap.set(id, genre.id);
         matched++;
       }
-      console.log(`[${genre.id}/JP] ${data.items?.length || 0} 件取得 → ジャンル一致 ${matched} 件`);
+      console.log(`[${genre.id}/JP] ${items.length} 件取得 → ジャンル一致 ${matched} 件`);
     } catch (err) {
       console.error(`[${genre.id}/JP] 検索に失敗: ${err.message}`);
     }
@@ -242,7 +275,7 @@ async function main() {
   const videoDetails = [];
   for (const idsChunk of chunk(videoIds, 50)) {
     const data = await callApi('videos', {
-      part: 'snippet,statistics,contentDetails',
+      part: 'snippet,statistics,contentDetails,status',
       id: idsChunk.join(','),
     });
     videoDetails.push(...(data.items || []));
@@ -250,9 +283,9 @@ async function main() {
 
   const shorts = videoDetails.filter(v => {
     const seconds = parseISODuration(v.contentDetails?.duration || 'PT0S');
-    return seconds > 0 && seconds <= 60;
+    return seconds > 0 && seconds <= 60 && isEmbeddableVideo(v);
   });
-  console.log(`Shorts判定（60秒以下）: ${shorts.length} / ${videoDetails.length} 件`);
+  console.log(`Shorts判定（60秒以下 + embeddable）: ${shorts.length} / ${videoDetails.length} 件`);
 
   const channelIds = [...new Set(shorts.map(v => v.snippet.channelId))];
   const subscriberMap = new Map();
@@ -267,8 +300,6 @@ async function main() {
     }
   }
 
-  const MIN_LIKE_COUNT = 50; // filter out low-like videos
-
   const videos = shorts
     .map(v => {
       const viewCount = Number(v.statistics?.viewCount || 0);
@@ -277,11 +308,13 @@ async function main() {
       const subscriberCount = subscriberMap.get(v.snippet.channelId);
       const durationSeconds = parseISODuration(v.contentDetails?.duration || 'PT0S');
       const title = v.snippet.title;
+      const description = v.snippet.description || '';
 
       if (subscriberCount === null || subscriberCount === undefined) return null;
       if (subscriberCount < MIN_SUBSCRIBERS) return null;
       if (viewCount < MIN_VIEW_COUNT) return null;
       if (likeCount < MIN_LIKE_COUNT) return null;
+      if (!containsJapanese(`${title} ${description}`)) return null;
 
       const growthRatio = Math.round(viewCount / Math.max(subscriberCount, 1));
       const spikeRatio = Number((viewCount / Math.max(subscriberCount, 1)).toFixed(2));
@@ -309,7 +342,7 @@ async function main() {
       }
 
       const genre = videoGenreMap.get(v.id) || 'other';
-      const genreMatch = isGenreMatch(title, genre);
+      const genreMatch = isGenreMatch(`${title} ${description}`, genre);
 
       return {
         id: v.id,
@@ -366,7 +399,7 @@ async function main() {
     .filter(v => !trimmedIds.has(v.id) && !v.resolvedAt)
     .map(v => ({ ...v, predictionOnly: true }));
 
-  const output = [...trimmed, ...pendingOnly];
+  const output = [...trimmed, ...pendingOnly].slice(0, MAX_TOTAL_VIDEOS);
   output.sort((a, b) => b.growthRatio - a.growthRatio);
 
   console.log(`最終出力: フィード ${trimmed.length} 件 + 答え合わせ待ち ${pendingOnly.length} 件 = 合計 ${output.length} 件`);
