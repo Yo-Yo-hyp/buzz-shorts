@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BUZZ SHORTS — Realtime Prediction Market</title>
-<meta name="description" content="BTC と大阪気温のリアルタイム予測市場。ポイントで Over/Under をベットし、透明な交換申請とランキングを楽しむサイバーPWA。">
+<meta name="description" content="BTC と大阪気温のリアルタイム観測・予測ポータル。ポイントはゲームスコアとして蓄積し、ランクと上位%で競うサイバーPWA。">
 <meta name="theme-color" content="#0B0E11">
 <style>
   :root{
@@ -59,18 +59,24 @@
   .price-box{display:flex;align-items:end;gap:10px;margin-top:14px;flex-wrap:wrap}
   .price{font-size:clamp(28px,6vw,40px);font-weight:900;letter-spacing:-.02em}
   .price small{font-size:14px;color:var(--text-dim);font-weight:600}
+  .price.urgent{animation:blinkUrgent .9s steps(2,end) infinite;color:var(--bad)}
+  @keyframes blinkUrgent{0%,100%{opacity:1}50%{opacity:.18}}
+  .mini .urgent{color:var(--bad);font-weight:900;animation:blinkUrgent .9s steps(2,end) infinite}
   .delta{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800}
   .delta.up{background:rgba(77,255,181,.12);color:var(--good)}
   .delta.down{background:rgba(255,122,122,.12);color:var(--bad)}
   .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
   .row{display:flex;gap:8px;flex-wrap:wrap}
   .row .chip.active{background:var(--accent);color:#081018;border-color:transparent;font-weight:800}
+  .weather-region-btn{min-width:120px}
   .row .chip.dir-up.active{background:var(--good);color:#081018}
   .row .chip.dir-down.active{background:var(--bad);color:#081018}
   .market-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
   .market-actions input{width:110px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text);padding:10px 12px}
   .market-actions .btn{padding:10px 14px}
   .mini{font-size:12px;color:var(--text-dim)}
+  .chart-wrap{margin-top:12px;padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+  .chart-wrap canvas{display:block;width:100%;height:120px}
   .list{margin-top:14px;display:grid;gap:8px}
   .bet-item{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
   .bet-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
@@ -94,14 +100,12 @@
   .dialog{position:relative;margin:auto;width:min(680px, calc(100% - 24px));background:linear-gradient(180deg, rgba(22,27,34,.98), rgba(12,15,20,.98));border:1px solid rgba(255,255,255,.09);border-radius:24px;box-shadow:var(--shadow);padding:18px}
   .dialog h3{margin:0 0 10px;font-size:20px}
   .dialog p{color:var(--text-dim);line-height:1.7}
-  .exchange-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-  .exchange-grid input,.exchange-grid select{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--text)}
-  .code{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(212,255,61,.08);border:1px solid rgba(212,255,61,.18);font-weight:800;word-break:break-all}
+  .adsense-slot{margin-top:14px;padding:14px;border-radius:16px;border:1px dashed rgba(212,255,61,.35);background:linear-gradient(90deg,rgba(212,255,61,.06),rgba(255,92,61,.06));color:var(--text-dim);font-size:12px;text-align:center;min-height:90px;display:flex;align-items:center;justify-content:center}
   .overlay .dialog{max-width:520px;text-align:center}
   .count{font-size:44px;font-weight:900;color:var(--accent);margin:12px 0}
   .toast{position:fixed;right:14px;bottom:14px;z-index:80;background:rgba(0,0,0,.82);border:1px solid rgba(255,255,255,.1);padding:12px 14px;border-radius:14px;box-shadow:var(--shadow);display:none;max-width:min(360px, calc(100% - 28px))}
   .toast.show{display:block}
-  @media (max-width: 980px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.controls,.exchange-grid{grid-template-columns:1fr}}
+  @media (max-width: 980px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -110,7 +114,7 @@
       <div class="brand">BUZZ <span>SHORTS</span></div>
       <button class="pill" id="pointsBtn" type="button">💠 <strong id="pointsValue">100</strong> pt</button>
       <button class="pill" id="rankBtn" type="button">Rank <strong id="rankValue">—</strong></button>
-      <button class="pill" id="exchangeBtn" type="button">POINT EXCHANGE</button>
+      <button class="pill" id="shareBtn" type="button">Xでスコアをシェア 🚀</button>
       <button class="pill" id="themeBtn" type="button">Theme</button>
       <button class="pill" id="resetBtn" type="button">Refresh All</button>
       <div class="spacer"></div>
@@ -121,14 +125,16 @@
   <main class="app">
     <section class="hero">
       <h1>爆速リアルタイムデータ予測市場</h1>
-      <p>動画依存を廃止し、BTC/USD と大阪気温のリアルタイム API だけで遊ぶ透明な予測市場です。ポイントは localStorage に永続化され、ログインボーナス、破産保護、ランキング、交換申請を統合しています。</p>
+      <p>動画依存を廃止し、BTC/USD と大阪気温のリアルタイム API だけで遊ぶ観測ポータルです。ポイントは localStorage に永続化され、ログインボーナス、破産保護、ランキングを統合しています。</p>
       <div class="stats">
         <div class="stat"><div class="label">現在ポイント</div><div class="value" id="statPoints">100</div></div>
         <div class="stat"><div class="label">連続ログイン</div><div class="value" id="statStreak">0日</div></div>
         <div class="stat"><div class="label">予想的中率</div><div class="value" id="statRate">0%</div></div>
-        <div class="stat"><div class="label">交換クールダウン</div><div class="value" id="statCooldown">--:--</div></div>
+        <div class="stat"><div class="label">観測ランク</div><div class="value" id="statRank">E</div></div>
       </div>
     </section>
+
+    <div class="adsense-slot" id="adTop">AdSense Slot A (Responsive)</div>
 
     <section class="grid">
       <div class="markets">
@@ -151,6 +157,8 @@
           <div class="list" id="historyList"></div>
         </section>
 
+        <div class="adsense-slot" id="adSide">AdSense Slot B (Responsive)</div>
+
         <section class="panel" id="bankruptcyPanel" style="display:none">
           <h2>破産保護プログラム</h2>
           <p class="muted">ポイントが尽きています。15秒待機して救済申請を行えます。</p>
@@ -162,28 +170,6 @@
       </div>
     </section>
   </main>
-
-  <div class="modal" id="exchangeModal" aria-hidden="true">
-    <div class="backdrop" data-close="exchange"></div>
-    <div class="dialog">
-      <h3>POINT EXCHANGE</h3>
-      <p>透明なポイント交換所。1,000pt 以上で申請可能。手動照合用の交換申請IDを発行します。連続申請は localStorage ベースのクールダウンで制御されます。</p>
-      <div class="exchange-grid">
-        <select id="exchangeAmount">
-          <option value="1000">1,000 pt</option>
-          <option value="3000">3,000 pt</option>
-          <option value="5000">5,000 pt</option>
-        </select>
-        <input id="exchangeMemo" placeholder="申請メモ（任意）" />
-      </div>
-      <div class="market-actions" style="margin-top:14px">
-        <button class="btn primary" id="exchangeSubmit" type="button">交換申請を発行</button>
-        <button class="btn" data-close="exchange" type="button">閉じる</button>
-      </div>
-      <div class="code" id="exchangeResult" style="display:none"></div>
-      <div class="mini" id="exchangeHint"></div>
-    </div>
-  </div>
 
   <div class="overlay" id="loadingOverlay">
     <div class="backdrop"></div>
@@ -205,7 +191,6 @@
     bets: 'buzz_bets',
     theme: 'buzz_theme',
     stats: 'buzz_stats',
-    cooldown: 'buzz_exchange_cooldown',
     rescue: 'buzz_rescue',
   };
 
@@ -214,8 +199,6 @@
   const STREAK_BONUS = 100;
   const RESCUE_POINTS = 30;
   const RESCUE_WAIT_SEC = 15;
-  const EXCHANGE_MIN = 1000;
-  const EXCHANGE_COOLDOWN_MS = 10 * 60 * 1000;
   const ODDS = { over: 1.9, under: 1.9 };
 
   const state = {
@@ -225,51 +208,87 @@
     bets: JSON.parse(localStorage.getItem(LS.bets) || '[]'),
     theme: localStorage.getItem(LS.theme) || 'acid',
     stats: JSON.parse(localStorage.getItem(LS.stats) || '{"total":0,"hit":0}'),
-    cooldownUntil: Number(localStorage.getItem(LS.cooldown) || 0),
     rescueClaimAt: Number(localStorage.getItem(LS.rescue) || 0),
+    weatherRegion: localStorage.getItem('buzz_weather_region') || 'jp',
   };
 
-  const btcMarket = {
-    id: 'btc',
-    title: 'BTC/USD 価格予測',
-    subtitle: 'CoinGecko API の最新価格を使った超短期予測市場',
-    current: null,
-    updatedAt: 0,
-    intervals: [180, 600],
-    selectedDuration: 180,
-    selectedDirection: 'over',
-    fetchCurrent: async () => {
-      const res = await fetch('https://api.coingecko.com/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-      if (!res.ok) throw new Error('BTC API failed');
-      const json = await res.json();
-      return Number(json.bitcoin?.usd || 0);
-    },
-  };
+  const CRYPTO_SYMBOLS = [
+    { id: 'btc', symbol: 'BTCUSDT', label: 'BTC/USD' },
+    { id: 'eth', symbol: 'ETHUSDT', label: 'ETH/USD' },
+    { id: 'sol', symbol: 'SOLUSDT', label: 'SOL/USD' },
+  ];
+  const CITY_OPTIONS = [
+    { id: 'tokyo', label: '東京', country: 'JP', flag: '🇯🇵', lat: 35.6895, lon: 139.6917, timezone: 'Asia/Tokyo', region: 'jp' },
+    { id: 'osaka', label: '大阪', country: 'JP', flag: '🇯🇵', lat: 34.6937, lon: 135.5022, timezone: 'Asia/Tokyo', region: 'jp' },
+    { id: 'nagoya', label: '名古屋', country: 'JP', flag: '🇯🇵', lat: 35.1815, lon: 136.9064, timezone: 'Asia/Tokyo', region: 'jp' },
+    { id: 'sydney', label: 'シドニー', country: 'AU', flag: '🇦🇺', lat: -33.8688, lon: 151.2093, timezone: 'Australia/Sydney', region: 'global' },
+    { id: 'delhi', label: 'デリー', country: 'IN', flag: '🇮🇳', lat: 28.6139, lon: 77.2090, timezone: 'Asia/Kolkata', region: 'global' },
+    { id: 'newyork', label: 'ニューヨーク', country: 'US', flag: '🇺🇸', lat: 40.7128, lon: -74.0060, timezone: 'America/New_York', region: 'global' },
+    { id: 'london', label: 'ロンドン', country: 'UK', flag: '🇬🇧', lat: 51.5074, lon: -0.1278, timezone: 'Europe/London', region: 'global' },
+  ];
 
-  const osakaMarket = {
-    id: 'osaka',
-    title: '大阪 気温予測',
-    subtitle: 'Open-Meteo API の最新気温で Over / Under をベット',
-    current: null,
-    updatedAt: 0,
-    intervals: [600, 1800],
-    selectedDuration: 600,
-    selectedDirection: 'over',
-    fetchCurrent: async () => {
-      const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=34.6937&longitude=135.5022&current=temperature_2m');
-      if (!res.ok) throw new Error('Weather API failed');
-      const json = await res.json();
-      return Number(json.current?.temperature_2m || 0);
-    },
-  };
+  function createCryptoMarket(sym) {
+    return {
+      id: sym.id,
+      type: 'crypto',
+      title: `${sym.label} 価格予測`,
+      subtitle: `Binance API (${sym.symbol}) の最新価格で超短期予測`,
+      symbol: sym.symbol,
+      displayName: sym.label,
+      current: null,
+      updatedAt: 0,
+      history: [],
+      intervals: [60, 180, 300],
+      selectedDuration: 60,
+      selectedDirection: 'over',
+      fetchCurrent: async function() {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${this.symbol}`);
+        if (!res.ok) throw new Error(`${this.symbol} API failed`);
+        const json = await res.json();
+        return Number(json.price || 0);
+      },
+    };
+  }
 
-  const markets = [btcMarket, osakaMarket];
+  function createCityTempMarket(city) {
+    return {
+      id: city.id,
+      type: 'weather',
+      title: `${city.label} 気温予測`,
+      subtitle: `Open-Meteo API (${city.label}) の最新気温で Over / Under`,
+      cityLabel: city.label,
+      country: city.country,
+      flag: city.flag,
+      lat: city.lat,
+      lon: city.lon,
+      timezone: city.timezone,
+      region: city.region,
+      displayName: `${city.label} 気温`,
+      current: null,
+      updatedAt: 0,
+      history: [],
+      intervals: [60, 180, 300],
+      selectedDuration: 60,
+      selectedDirection: 'over',
+      fetchCurrent: async function() {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&current=temperature_2m`);
+        if (!res.ok) throw new Error(`${this.cityLabel} weather API failed`);
+        const json = await res.json();
+        return Number(json.current?.temperature_2m || 0);
+      },
+    };
+  }
+
+  const markets = [
+    ...CRYPTO_SYMBOLS.map(createCryptoMarket),
+    ...CITY_OPTIONS.map(createCityTempMarket),
+  ];
   const el = {
     pointsValue: document.getElementById('pointsValue'),
     statPoints: document.getElementById('statPoints'),
     statStreak: document.getElementById('statStreak'),
     statRate: document.getElementById('statRate'),
-    statCooldown: document.getElementById('statCooldown'),
+    statRank: document.getElementById('statRank'),
     rankTitle: document.getElementById('rankTitle'),
     rankPercent: document.getElementById('rankPercent'),
     rankBar: document.getElementById('rankBar'),
@@ -280,13 +299,6 @@
     osakaCard: document.getElementById('osakaCard'),
     themeBtn: document.getElementById('themeBtn'),
     resetBtn: document.getElementById('resetBtn'),
-    exchangeBtn: document.getElementById('exchangeBtn'),
-    exchangeModal: document.getElementById('exchangeModal'),
-    exchangeAmount: document.getElementById('exchangeAmount'),
-    exchangeMemo: document.getElementById('exchangeMemo'),
-    exchangeSubmit: document.getElementById('exchangeSubmit'),
-    exchangeResult: document.getElementById('exchangeResult'),
-    exchangeHint: document.getElementById('exchangeHint'),
     loadingOverlay: document.getElementById('loadingOverlay'),
     loadingCount: document.getElementById('loadingCount'),
     toast: document.getElementById('toast'),
@@ -302,7 +314,6 @@
     localStorage.setItem(LS.bets, JSON.stringify(state.bets));
     localStorage.setItem(LS.theme, state.theme);
     localStorage.setItem(LS.stats, JSON.stringify(state.stats));
-    localStorage.setItem(LS.cooldown, String(state.cooldownUntil));
     localStorage.setItem(LS.rescue, String(state.rescueClaimAt));
   }
 
@@ -324,6 +335,20 @@
   }
   function todayKey() { return new Date().toISOString().slice(0,10); }
 
+  function localTimeFor(market) {
+    if (market.type !== 'weather' || !market.timezone) return '';
+    try {
+      return new Intl.DateTimeFormat('ja-JP', {
+        timeZone: market.timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).format(new Date());
+    } catch {
+      return '';
+    }
+  }
+
   function applyTheme() {
     document.documentElement.dataset.theme = state.theme;
   }
@@ -341,6 +366,7 @@
     el.rankPercent.textContent = `上位 ${pct}%`;
     el.rankBar.style.width = `${100 - pct}%`;
     el.rankValue.textContent = rank;
+    el.statRank.textContent = rank;
   }
 
   function updatePointsUI() {
@@ -349,8 +375,6 @@
     el.statStreak.textContent = `${state.streak}日`;
     const rate = state.stats.total ? Math.round((state.stats.hit / state.stats.total) * 100) : 0;
     el.statRate.textContent = `${rate}%`;
-    const cd = Math.max(0, state.cooldownUntil - Date.now());
-    el.statCooldown.textContent = cd > 0 ? fmtRemain(cd) : '--:--';
     el.dailyInfo.textContent = `Daily Bonus Streak: ${state.streak}`;
     el.bankruptcyPanel.style.display = state.points <= 0 ? 'block' : 'none';
     updateRankUI();
@@ -371,27 +395,38 @@
   function renderMarketCard(market) {
     const bets = state.bets.filter(b => b.marketId === market.id).sort((a,b) => b.createdAt - a.createdAt);
     const now = Date.now();
+    const nextDue = bets.find(b => !b.resolved && b.targetAt > now);
+    const remain = nextDue ? Math.max(0, nextDue.targetAt - now) : 0;
+    const urgent = remain > 0 && remain < 60000;
     const currentDelta = bets.some(b => !b.resolved) ? `<span class="delta up">LIVE</span>` : '';
-    const durations = market.intervals.map(sec => `<button class="chip duration-btn${market.selectedDuration === sec ? ' active' : ''}" data-duration="${sec}">${sec === 180 ? '3分後' : sec === 600 ? '10分後' : `${Math.round(sec/60)}分後`}</button>`).join('');
+    const durations = market.intervals.map(sec => `<button class="chip duration-btn${market.selectedDuration === sec ? ' active' : ''}" data-duration="${sec}">${sec === 60 ? '1分後' : sec === 180 ? '3分後' : sec === 300 ? '5分後' : `${Math.round(sec/60)}分後`}</button>`).join('');
     const directionBtns = [`<button class="chip dir-btn dir-up${market.selectedDirection === 'over' ? ' active' : ''}" data-direction="over">Over / 上昇</button>`,`<button class="chip dir-btn dir-down${market.selectedDirection === 'under' ? ' active' : ''}" data-direction="under">Under / 下落</button>`].join('');
     const list = bets.length ? bets.slice(0, 8).map(b => {
       const rem = Math.max(0, b.targetAt - now);
       const status = b.resolved ? (b.hit ? '的中' : '不的中') : (rem <= 0 ? '判定中' : fmtRemain(rem));
-      return `<div class="bet-item"><div class="bet-top"><div><div class="bet-title">${b.direction === 'over' ? 'Over' : 'Under'} · ${fmt(b.amount)}pt</div><div class="bet-meta">${new Date(b.createdAt).toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'})} / 基準 ${market.id === 'btc' ? fmtPrice(b.startValue) : fmtTemp(b.startValue)}</div></div><span class="tag ${b.resolved ? (b.hit ? 'up' : 'down') : 'pending'}">${b.resolved ? (b.hit ? `+${fmt(b.payout)}pt` : '0pt') : status}</span></div></div>`;
+      return `<div class="bet-item"><div class="bet-top"><div><div class="bet-title">${b.direction === 'over' ? 'Over' : 'Under'} · ${fmt(b.amount)}pt</div><div class="bet-meta">${new Date(b.createdAt).toLocaleTimeString('ja-JP', {hour:'2-digit',minute:'2-digit'})} / 基準 ${market.type === 'crypto' ? fmtPrice(b.startValue) : fmtTemp(b.startValue)}</div></div><span class="tag ${b.resolved ? (b.hit ? 'up' : 'down') : 'pending'}">${b.resolved ? (b.hit ? `+${fmt(b.payout)}pt` : '0pt') : status}</span></div></div>`;
     }).join('') : '<div class="muted">まだベットがありません。</div>';
 
+    const cityMeta = market.type === 'weather'
+      ? `<div class="mini" style="margin-top:6px">${market.flag || ''} ${market.cityLabel} (${market.country}) ・ 現地時刻 ${localTimeFor(market)}</div>`
+      : '';
+
     return `
+      <section data-market-id="${market.id}" style="margin-bottom:14px">
       <div class="market-head">
         <div>
           <div class="market-title">${market.title}</div>
           <div class="market-sub">${market.subtitle}</div>
+          ${cityMeta}
         </div>
         <button class="btn" data-refresh="${market.id}">1タップ更新</button>
       </div>
       <div class="price-box">
-        <div class="price" id="price-${market.id}">${market.id === 'btc' ? (market.current ? fmtPrice(market.current) : '—') : (market.current != null ? fmtTemp(market.current) : '—')} <small>${currentDelta}</small></div>
+        <div class="price${urgent ? ' urgent' : ''}" id="price-${market.id}">${market.type === 'crypto' ? (market.current ? fmtPrice(market.current) : '—') : (market.current != null ? fmtTemp(market.current) : '—')} <small>${currentDelta}</small></div>
         <div class="mini" id="updated-${market.id}">${market.updatedAt ? new Date(market.updatedAt).toLocaleTimeString('ja-JP') : '未取得'}</div>
       </div>
+      <div class="mini">判定まで: <strong class="${urgent ? 'urgent' : ''}" id="countdown-${market.id}">${nextDue ? fmtRemain(remain) : '--:--'}</strong></div>
+      <div class="chart-wrap"><canvas id="chart-${market.id}" width="900" height="160"></canvas></div>
       <div class="controls">
         <div class="row">${durations}</div>
         <div class="row">${directionBtns}</div>
@@ -402,36 +437,57 @@
         <div class="mini">推奨払い戻し: ×${ODDS.over}</div>
       </div>
       <div class="list">${list}</div>
+      </section>
     `;
   }
 
   function renderMarkets() {
-    el.btcCard.innerHTML = renderMarketCard(btcMarket);
-    el.osakaCard.innerHTML = renderMarketCard(osakaMarket);
+    const cryptoCards = markets.filter(m => m.type === 'crypto').map(renderMarketCard).join('');
+    const weatherTabs = `
+      <div class="row" style="margin-bottom:8px">
+        <button class="chip weather-region-btn${state.weatherRegion === 'jp' ? ' active' : ''}" data-weather-region="jp">日本（国内）</button>
+        <button class="chip weather-region-btn${state.weatherRegion === 'global' ? ' active' : ''}" data-weather-region="global">グローバル</button>
+      </div>
+    `;
+    const cityCards = markets
+      .filter(m => m.type === 'weather' && m.region === state.weatherRegion)
+      .map(renderMarketCard)
+      .join('');
+    el.btcCard.innerHTML = `<div class="mini" style="margin-bottom:8px">Crypto Markets</div>${cryptoCards}`;
+    el.osakaCard.innerHTML = `<div class="mini" style="margin-bottom:8px">気温 Markets (東京 / 大阪 / 名古屋 / シドニー / デリー / ニューヨーク / ロンドン)</div>${weatherTabs}${cityCards}`;
 
-    el.btcCard.querySelectorAll('.duration-btn').forEach(btn => btn.addEventListener('click', () => {
-      btcMarket.selectedDuration = Number(btn.dataset.duration);
-      renderMarkets();
-    }));
-    el.osakaCard.querySelectorAll('.duration-btn').forEach(btn => btn.addEventListener('click', () => {
-      osakaMarket.selectedDuration = Number(btn.dataset.duration);
+    document.querySelectorAll('.duration-btn').forEach(btn => btn.addEventListener('click', () => {
+      const card = btn.closest('[data-market-id]');
+      const marketId = card ? card.dataset.marketId : null;
+      const m = markets.find(x => x.id === marketId);
+      if (!m) return;
+      m.selectedDuration = Number(btn.dataset.duration);
       renderMarkets();
     }));
 
-    el.btcCard.querySelectorAll('.dir-btn').forEach(btn => btn.addEventListener('click', () => {
-      btcMarket.selectedDirection = btn.dataset.direction;
-      renderMarkets();
-    }));
-    el.osakaCard.querySelectorAll('.dir-btn').forEach(btn => btn.addEventListener('click', () => {
-      osakaMarket.selectedDirection = btn.dataset.direction;
+    document.querySelectorAll('.dir-btn').forEach(btn => btn.addEventListener('click', () => {
+      const card = btn.closest('[data-market-id]');
+      const marketId = card ? card.dataset.marketId : null;
+      const m = markets.find(x => x.id === marketId);
+      if (!m) return;
+      m.selectedDirection = btn.dataset.direction;
       renderMarkets();
     }));
 
     document.querySelectorAll('[data-refresh]').forEach(btn => btn.addEventListener('click', () => refreshMarket(btn.dataset.refresh, true)));
     document.querySelectorAll('.bet-btn').forEach(btn => btn.addEventListener('click', () => {
-      const market = btn.dataset.market === 'btc' ? btcMarket : osakaMarket;
+      const market = markets.find(m => m.id === btn.dataset.market);
+      if (!market) return;
       placeBet(market);
     }));
+
+    document.querySelectorAll('.weather-region-btn').forEach(btn => btn.addEventListener('click', () => {
+      state.weatherRegion = btn.dataset.weatherRegion || 'jp';
+      localStorage.setItem('buzz_weather_region', state.weatherRegion);
+      renderMarkets();
+    }));
+
+    markets.forEach(drawChart);
   }
 
   function renderHistory() {
@@ -444,13 +500,81 @@
       <div class="bet-item">
         <div class="bet-top">
           <div>
-            <div class="bet-title">${b.marketId === 'btc' ? 'BTC/USD' : '大阪 気温'} / ${b.direction === 'over' ? 'Over' : 'Under'}</div>
+            <div class="bet-title">${markets.find(m => m.id === b.marketId)?.displayName || b.marketId} / ${b.direction === 'over' ? 'Over' : 'Under'}</div>
             <div class="bet-meta">${new Date(b.createdAt).toLocaleString('ja-JP')} · ${fmt(b.amount)}pt</div>
           </div>
           <span class="tag ${b.resolved ? (b.hit ? 'up' : 'down') : 'pending'}">${b.resolved ? (b.hit ? `+${fmt(b.payout)}pt` : '0pt') : 'pending'}</span>
         </div>
       </div>
     `).join('');
+  }
+
+  function drawChart(market) {
+    const canvas = document.getElementById(`chart-${market.id}`);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.clientWidth || 900;
+    const cssH = canvas.clientHeight || 120;
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    const points = market.history.slice(-24);
+    if (points.length < 2) {
+      ctx.fillStyle = 'rgba(255,255,255,.25)';
+      ctx.font = '600 14px Noto Sans JP, sans-serif';
+      ctx.fillText('価格履歴がまだありません', 16, 26);
+      return;
+    }
+    const vals = points.map(p => p.price);
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const pad = 16;
+    const w = cssW - pad * 2;
+    const h = cssH - pad * 2;
+    const stepX = w / (points.length - 1);
+    const range = Math.max(1, max - min);
+
+    ctx.fillStyle = 'rgba(212,255,61,.06)';
+    ctx.strokeStyle = 'rgba(212,255,61,.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect?.(8, 8, cssW - 16, cssH - 16, 12);
+    ctx.stroke();
+
+    ctx.beginPath();
+    points.forEach((p, i) => {
+      const x = pad + i * stepX;
+      const y = pad + h - ((p.price - min) / range) * h;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = 'rgba(212,255,61,1)';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = 'rgba(212,255,61,.55)';
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = 'rgba(255,92,61,.95)';
+    points.forEach((p, i) => {
+      const x = pad + i * stepX;
+      const y = pad + h - ((p.price - min) / range) * h;
+      if (i === points.length - 1) {
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+  }
+
+  function shareToX() {
+    const { rank, pct } = rankInfo(state.points);
+    const winRate = state.stats.total ? Math.round((state.stats.hit / state.stats.total) * 100) : 0;
+    const text = `【BUZZ SHORTS】現在の所持ポイント: ${fmt(state.points)}pt | ランク: ${rank} 📈 勝率: ${winRate}% | 上位${pct}% 🔗 https://buzzshorts.live #BUZZSHORTS`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 
   function placeBet(market) {
@@ -479,7 +603,7 @@
     updatePointsUI();
     renderMarkets();
     renderHistory();
-    toast(`${market.id === 'btc' ? 'BTC' : '気温'} に ${amount}pt ベット`);
+    toast(`${market.displayName || market.id} に ${amount}pt ベット`);
   }
 
   async function refreshMarket(id, manual = false) {
@@ -498,8 +622,11 @@
       }
       market.current = await market.fetchCurrent();
       market.updatedAt = Date.now();
+      market.history.push({ ts: market.updatedAt, price: market.current });
+      if (market.history.length > 60) market.history.shift();
       renderMarkets();
-      toast(`${market.id === 'btc' ? 'BTC' : '気温'} 更新完了`);
+      drawChart(market);
+      toast(`${market.displayName || market.id} 更新完了`);
     } catch (e) {
       toast(`取得失敗: ${e.message}`);
     } finally {
@@ -521,6 +648,8 @@
       try {
         market.current = await market.fetchCurrent();
         market.updatedAt = Date.now();
+        market.history.push({ ts: market.updatedAt, price: market.current });
+        if (market.history.length > 60) market.history.shift();
         bets.forEach(b => {
           const diff = market.current - b.startValue;
           const hit = b.direction === 'over' ? diff > 0 : diff < 0;
@@ -541,41 +670,8 @@
     }
     updatePointsUI();
     renderMarkets();
+    markets.forEach(drawChart);
     renderHistory();
-  }
-
-  function updateCooldownUI() {
-    const remain = Math.max(0, state.cooldownUntil - Date.now());
-    el.statCooldown.textContent = remain > 0 ? fmtRemain(remain) : '--:--';
-    el.exchangeSubmit.disabled = state.points < EXCHANGE_MIN || remain > 0;
-    el.exchangeHint.textContent = remain > 0 ? `申請後クールダウン中: ${fmtRemain(remain)}` : `最低 ${EXCHANGE_MIN}pt から申請可能`;
-    el.exchangeResult.style.display = 'none';
-  }
-
-  function openModal() { el.exchangeModal.classList.add('show'); updateCooldownUI(); }
-  function closeModal() { el.exchangeModal.classList.remove('show'); }
-
-  function generateCode(prefix) {
-    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-    const part = () => Array.from({length:4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    return `${prefix}-${part()}-${part()}`;
-  }
-
-  function submitExchange() {
-    const amount = Number(el.exchangeAmount.value || EXCHANGE_MIN);
-    if (amount < EXCHANGE_MIN) return toast('1,000pt 以上で申請してください');
-    if (state.points < amount) return toast('ポイント不足');
-    if (Date.now() < state.cooldownUntil) return toast('クールダウン中');
-    state.points -= amount;
-    state.cooldownUntil = Date.now() + EXCHANGE_COOLDOWN_MS;
-    const code = generateCode('EX');
-    state.exchangeCode = code;
-    save();
-    updatePointsUI();
-    updateCooldownUI();
-    el.exchangeResult.style.display = 'block';
-    el.exchangeResult.textContent = `交換申請ID: ${code} / ${amount.toLocaleString('en-US')}pt / 手動照合待ち`;
-    toast('交換申請を発行しました');
   }
 
   function rescueTick() {
@@ -603,7 +699,6 @@
 
   function updateAll() {
     updatePointsUI();
-    updateCooldownUI();
     rescueTick();
     renderMarkets();
     renderHistory();
@@ -618,9 +713,7 @@
   el.resetBtn.addEventListener('click', async () => {
     await Promise.all(markets.map(m => refreshMarket(m.id, true)));
   });
-  el.exchangeBtn.addEventListener('click', openModal);
-  el.exchangeSubmit.addEventListener('click', submitExchange);
-  el.exchangeModal.querySelectorAll('[data-close="exchange"]').forEach(btn => btn.addEventListener('click', closeModal));
+  document.getElementById('shareBtn').addEventListener('click', shareToX);
   el.rescueBtn.addEventListener('click', openRescue);
 
   applyTheme();
@@ -630,14 +723,11 @@
   markets.forEach(m => refreshMarket(m.id, false));
   setInterval(resolveDueBets, 15000);
   setInterval(() => {
-    updateCooldownUI();
     rescueTick();
     updatePointsUI();
+    renderMarkets();
   }, 1000);
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
-  });
 })();
 </script>
 </body>
